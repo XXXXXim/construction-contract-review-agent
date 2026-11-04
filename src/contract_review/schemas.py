@@ -104,7 +104,10 @@ class EvalCase(BaseModel):
     """eval/cases/*.yaml 한 줄 (정답 라벨)."""
 
     contract_id: str
-    clause_id: str
+    clause_id: str  # 합성 계약서 안의 조항 ID (재번호 적용 후)
     category: Category
     expected_risk: RiskLevel
     injected_change: str
+    mutation_id: str = ""
+    standard_doc: str = "ftc_standard_subcontract"  # 정답 표준 문서
+    standard_clause_id: str = ""  # 정답 표준 조항 (citation accuracy, hit@3 에 사용)

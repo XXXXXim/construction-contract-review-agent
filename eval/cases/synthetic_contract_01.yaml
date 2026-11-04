@@ -1,0 +1,65 @@
+cases:
+- contract_id: synthetic_contract_01
+  clause_id: 제31조
+  category: design_change
+  expected_risk: medium
+  injected_change: 설계변경 대금 조정 기한 30일 → 90일
+  mutation_id: dc_adjust_30_to_90
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제35조
+- contract_id: synthetic_contract_01
+  clause_id: 제34조
+  category: payment_deadline
+  expected_risk: high
+  injected_change: 현금비율 유지 의무 삭제, 전액 어음 지급 허용
+  mutation_id: pay_cash_ratio_removed
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제40조
+- contract_id: synthetic_contract_01
+  clause_id: 제41조
+  category: unfair_special_terms
+  expected_risk: high
+  injected_change: 민원·산재 비용 수급사업자 전가
+  mutation_id: unfair_civil_complaint_cost
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제47조
+- contract_id: synthetic_contract_01
+  clause_id: 제45조
+  category: payment_deadline
+  expected_risk: medium
+  injected_change: 대금지급보증 기한 30일 → 90일
+  mutation_id: guarantee_30_to_90
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제53조
+- contract_id: synthetic_contract_01
+  clause_id: 제46조
+  category: damages_cap
+  expected_risk: medium
+  injected_change: 원사업자 위반 시 3배 배상 → 1배
+  mutation_id: damages_treble_to_single
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제54조
+- contract_id: synthetic_contract_01
+  clause_id: 제48조
+  category: delay_penalty
+  expected_risk: high
+  injected_change: 불가항력 등 지체일수 불산입 사유 삭제
+  mutation_id: delay_exemptions_removed
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제56조
+- contract_id: synthetic_contract_01
+  clause_id: 제49조
+  category: defect_liability
+  expected_risk: medium
+  injected_change: 하자보수보증금 반환 기한 10일 → 90일
+  mutation_id: defect_refund_10_to_90
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제57조
+- contract_id: synthetic_contract_01
+  clause_id: 제50조
+  category: termination
+  expected_risk: medium
+  injected_change: 수급사업자 해지 사유(대금 감소) 40% → 70%
+  mutation_id: term_40_to_70
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제58조

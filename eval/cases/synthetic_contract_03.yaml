@@ -1,0 +1,65 @@
+cases:
+- contract_id: synthetic_contract_03
+  clause_id: 제28조
+  category: design_change
+  expected_risk: medium
+  injected_change: 증액분 지급 기한 15일 → 60일
+  mutation_id: dc_pay_15_to_60
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제35조
+- contract_id: synthetic_contract_03
+  clause_id: 제33조
+  category: payment_deadline
+  expected_risk: high
+  injected_change: 지급기일 상한 60일 → 90일
+  mutation_id: pay_60_to_90
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제40조
+- contract_id: synthetic_contract_03
+  clause_id: 제39조
+  category: unfair_special_terms
+  expected_risk: high
+  injected_change: 민원·산재 비용 수급사업자 전가
+  mutation_id: unfair_civil_complaint_cost
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제47조
+- contract_id: synthetic_contract_03
+  clause_id: 제44조
+  category: payment_deadline
+  expected_risk: medium
+  injected_change: 대금지급보증 기한 30일 → 90일
+  mutation_id: guarantee_30_to_90
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제53조
+- contract_id: synthetic_contract_03
+  clause_id: 제45조
+  category: damages_cap
+  expected_risk: medium
+  injected_change: 수급사업자 무과실 면책 삭제
+  mutation_id: damages_sub_strict
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제54조
+- contract_id: synthetic_contract_03
+  clause_id: 제47조
+  category: delay_penalty
+  expected_risk: medium
+  injected_change: 지체상금 공제 시 합의 요건 삭제
+  mutation_id: delay_unilateral_offset
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제56조
+- contract_id: synthetic_contract_03
+  clause_id: 제48조
+  category: defect_liability
+  expected_risk: high
+  injected_change: 원사업자 제공 자재·지시로 인한 하자 면책 삭제
+  mutation_id: defect_exemptions_removed
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제57조
+- contract_id: synthetic_contract_03
+  clause_id: 제49조
+  category: termination
+  expected_risk: high
+  injected_change: 해제·해지권을 원사업자에게만 부여
+  mutation_id: term_one_sided
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제58조

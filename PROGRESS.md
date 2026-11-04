@@ -49,3 +49,21 @@
 
 **다음 할 일**
 - M2: `scripts/make_synthetic.py` (표준하도급계약서 본문 기반, 시드 고정, 계약서 3개 × 변형 7~10개, 정상 조항 포함) + `eval/cases/*.yaml`
+
+## 2026-11-04 · M2 합성 평가셋
+**한 일**
+- `scripts/make_synthetic.py`: 변형 카탈로그 25종(7개 카테고리), 계약서 3개 × 변형 8개 = **라벨 24개**
+- 검색이 조 번호만 보고 맞히지 못하게: 정상 조항 10개 삭제 후 재번호, "원사업자→갑 / 수급사업자→을" 치환
+- 라벨에 `standard_clause_id`(정답 표준 조항) 포함 → citation accuracy, hit@3 계산용
+- `tests/test_synthetic.py`: 시드 재현성(해시), 변형 패턴이 원문에 실존·적용 후 변화, 커밋된 라벨↔계약서 정합, 정상 조항 > 변형 조항
+
+**숫자**
+- 계약서당 조항 50개 (변형 8, 정상 42) · 라벨 카테고리 분포: payment 6, unfair 4, design 3, delay 3, termination 3, damages 3, defect 2
+- `make test`: 36 passed · `make lint`: 통과
+
+**결정한 것**
+- 변형은 전부 결정적 문자열 치환(LLM 미사용) → 재현성 보장, 라벨 정확
+- 조항당 변형 최대 1개 (평가 매칭 키가 조항+카테고리)
+
+**다음 할 일**
+- M3: 표준 조항 인덱스(BM25 + 선택적 임베딩) + `retrieve_standard` 노드 + hit@3 측정
