@@ -46,5 +46,5 @@
 - [ ] `docker build` ← 이 세션에 docker 데몬이 없어 **미검증**. 보스 맥에서 `docker build -t contract-review .` 확인 필요
 
 ## M7: README 케이스 스터디
-- [ ] 문제 정의, 아키텍처(Mermaid), 비교표, 한계, 다음 단계
+- [x] 문제 정의, 아키텍처(Mermaid), 비교표(fake), 한계, 다음 단계 (실제 LLM 숫자는 키 확보 후 교체)
 - [ ] 최종 보고 (지표표, 최대 개선, 한계 3, 자소서 3줄, 면접 질문 5)
