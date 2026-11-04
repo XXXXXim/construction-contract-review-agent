@@ -1,0 +1,48 @@
+# PLAN: 마일스톤 (마감 11/7(토) 23:00)
+
+> 시간이 모자라면 **M6 UI를 줄이고 M5 평가를 지킨다.**
+
+## M0: 하네스 파일, 레포 구조
+- [x] `CLAUDE.md`, `docs/SPEC.md`, `docs/PLAN.md`, `PROGRESS.md`
+- [x] `Makefile` (setup/test/eval/eval-baseline/run/lint), `.env.example`, `.gitignore`
+- [x] `pyproject.toml` (허용 의존성만), 패키지 골격, pydantic 스키마 초안
+- [x] `make test` 통과 (스모크 테스트)
+- [ ] SPEC 보고 → **보스 승인 대기**
+
+## M1: PDF 파싱, 조항 분할
+- [ ] `data/raw/`에 원문 3종 확인 (없으면 멈추고 목록 보고)
+- [ ] `parse` 노드 (pypdf), `split_clauses` 노드 ("제n조(제목)" 패턴)
+- [ ] 표준계약서 3종의 조항 수와 제목 표 출력 (`scripts/inspect_raw.py`)
+- [ ] SPEC 5절 카테고리 표를 원문 출처로 채움 (기준값 + 파일명/조항)
+- [ ] 단위 테스트 통과
+
+## M2: 합성 평가셋
+- [ ] `scripts/make_synthetic.py` (시드 고정): 표준하도급계약서 기반 계약서 3개 × 변형 7~10개
+- [ ] 정상 조항 포함 (오탐 측정용)
+- [ ] `eval/cases/*.yaml` 라벨 20개 이상
+- [ ] 두 번 실행해서 결과 동일 확인 (해시 비교 테스트)
+
+## M3: 검색 + 검색 평가
+- [ ] 표준 조항 인덱스 (BM25, 임베딩 선택적)
+- [ ] `retrieve_standard` 노드, 임베딩 없을 때 BM25 폴백
+- [ ] hit@3 측정 → PROGRESS 기록 (BM25 단독 vs 하이브리드)
+
+## M4: 규칙 레이어 + LLM 판정 + 근거 검증
+- [ ] `rule_check` (원문 추출 기준값 사용)
+- [ ] `llm_judge` 구조화 출력 + `evidence_quote` 검증
+- [ ] `report` (MD + JSON, 면책 고지)
+- [ ] LangGraph 조립, `FakeLLM` E2E 테스트 통과
+- [ ] 실제 LLM으로 리포트 1건 생성
+
+## M5: baseline / v1 / v2 비교 평가
+- [ ] `make eval-baseline`, `make eval CONFIG=v1`, `make eval`
+- [ ] 비교표 `eval/results/{날짜}_compare.md` 저장
+- [ ] 무엇을 바꿨더니 어떤 지표가 얼마나 변했는지 PROGRESS에 기록
+
+## M6: Streamlit UI + Dockerfile
+- [ ] PDF 업로드 → 리포트 표시/다운로드
+- [ ] `make run`, `docker build` 성공
+
+## M7: README 케이스 스터디
+- [ ] 문제 정의, 아키텍처(Mermaid), 비교표, 한계, 다음 단계
+- [ ] 최종 보고 (지표표, 최대 개선, 한계 3, 자소서 3줄, 면접 질문 5)
