@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 import yaml
 from pydantic import BaseModel
@@ -23,6 +24,7 @@ class SourceRef(BaseModel):
 class Threshold(BaseModel):
     id: str
     category: Category
+    worse_if: Literal["greater", "less", "none"] = "none"  # 계약서 값이 기준보다 크면/작으면 불리
     value: float | None  # None = TODO(source-needed)
     unit: str
     description: str
@@ -44,3 +46,8 @@ def load_thresholds(path: Path = THRESHOLDS_PATH) -> list[Threshold]:
 
 def thresholds_for(category: Category) -> list[Threshold]:
     return [t for t in load_thresholds() if t.category == category and t.value is not None]
+
+
+def rule_thresholds() -> list[Threshold]:
+    """규칙 비교에 쓸 수 있는 것: 값이 있고 불리 방향이 정해진 것."""
+    return [t for t in load_thresholds() if t.value is not None and t.worse_if != "none"]

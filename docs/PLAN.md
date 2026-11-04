@@ -28,20 +28,22 @@
 - [x] hit@3 측정 → PROGRESS 기록 (BM25 단독; 하이브리드는 키 확보 후 측정)
 
 ## M4: 규칙 레이어 + LLM 판정 + 근거 검증
-- [ ] `rule_check` (원문 추출 기준값 사용)
-- [ ] `llm_judge` 구조화 출력 + `evidence_quote` 검증
-- [ ] `report` (MD + JSON, 면책 고지)
-- [ ] LangGraph 조립, `FakeLLM` E2E 테스트 통과
-- [ ] 실제 LLM으로 리포트 1건 생성
+- [x] `rule_check` (원문 추출 기준값 14개, 등장 순서 맞춤 숫자 비교)
+- [x] `llm_judge` 구조화 출력 + `evidence_quote` 검증 (지목 조항 본문 부분문자열, 실패 시 폐기)
+- [x] `report` (MD + JSON, 면책 고지)
+- [x] LangGraph 조립 (baseline/v1/v2 경로), `FakeLLM` E2E 테스트 통과
+- [ ] 실제 LLM으로 리포트 1건 생성 ← **API 키 필요**
 
 ## M5: baseline / v1 / v2 비교 평가
-- [ ] `make eval-baseline`, `make eval CONFIG=v1`, `make eval`
-- [ ] 비교표 `eval/results/{날짜}_compare.md` 저장
+- [x] `make eval-baseline`, `make eval CONFIG=v1`, `make eval` (fake 판정기로 동작 확인)
+- [x] 비교표 `eval/results/{날짜}_compare.md` 저장 (fake)
+- [ ] 실제 LLM으로 baseline/v1/v2 측정 ← **API 키 필요**
 - [ ] 무엇을 바꿨더니 어떤 지표가 얼마나 변했는지 PROGRESS에 기록
 
 ## M6: Streamlit UI + Dockerfile
-- [ ] PDF 업로드 → 리포트 표시/다운로드
-- [ ] `make run`, `docker build` 성공
+- [x] PDF 업로드 → 리포트 표시/다운로드 (`app/streamlit_app.py`)
+- [x] `make run` 기동 확인 (헬스체크 ok)
+- [ ] `docker build` ← 이 세션에 docker 데몬이 없어 **미검증**. 보스 맥에서 `docker build -t contract-review .` 확인 필요
 
 ## M7: README 케이스 스터디
 - [ ] 문제 정의, 아키텍처(Mermaid), 비교표, 한계, 다음 단계

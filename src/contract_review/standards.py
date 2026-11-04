@@ -41,8 +41,7 @@ def normalize_ws(text: str) -> str:
 def load_standard_clauses() -> dict[str, list[Clause]]:
     """doc_id → 본문 조항 리스트."""
     return {
-        doc_id: body_clauses(split_clauses(parse_document(path, doc_id=doc_id)))
-        for doc_id, path in SOURCES.items()
+        doc_id: body_clauses(split_clauses(parse_document(path, doc_id=doc_id))) for doc_id, path in SOURCES.items()
     }
 
 

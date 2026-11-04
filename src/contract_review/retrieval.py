@@ -84,9 +84,7 @@ class StandardIndex:
     _collection: object | None = field(default=None, repr=False)
 
     @classmethod
-    def build(
-        cls, clauses: list[Clause] | None = None, embedder: Embedder | None = None
-    ) -> StandardIndex:
+    def build(cls, clauses: list[Clause] | None = None, embedder: Embedder | None = None) -> StandardIndex:
         if clauses is None:
             clauses = [c for cs in load_standard_clauses().values() for c in cs]
         docs = [tokenize(f"{c.title} {c.text}") for c in clauses]

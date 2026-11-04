@@ -71,9 +71,7 @@ def test_parse_rejects_unknown_suffix(tmp_path: Path) -> None:
         ("molit_standard_contract_private_2026-34.pdf", 43, ("제30조", "지체상금")),
     ],
 )
-def test_real_sources_split(
-    filename: str, expected_body: int | None, spot: tuple[str, str]
-) -> None:
+def test_real_sources_split(filename: str, expected_body: int | None, spot: tuple[str, str]) -> None:
     doc = parse_document(RAW / filename)
     cs = split_clauses(doc)
     body = body_clauses(cs)

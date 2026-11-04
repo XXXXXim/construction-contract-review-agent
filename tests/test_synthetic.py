@@ -44,10 +44,7 @@ def test_committed_cases_match_contracts() -> None:
     for yml in sorted((ROOT / "eval" / "cases").glob("synthetic_contract_*.yaml")):
         cases = [EvalCase.model_validate(c) for c in yaml.safe_load(yml.read_text())["cases"]]
         text = (ROOT / "data" / "synthetic" / f"{yml.stem}.txt").read_text()
-        clauses = {
-            c.clause_id: c
-            for c in split_clauses(ParsedDocument(doc_id=yml.stem, text=text, pages=1))
-        }
+        clauses = {c.clause_id: c for c in split_clauses(ParsedDocument(doc_id=yml.stem, text=text, pages=1))}
         std = {c.clause_id: c for c in load_standard_clauses()[STANDARD_DOC]}
         for case in cases:
             assert case.clause_id in clauses, case

@@ -30,9 +30,7 @@ def test_bm25_finds_standard_clause_for_rewritten_text() -> None:
 
 def test_doc_filter_restricts_results() -> None:
     index = StandardIndex.build()
-    q = Clause(
-        doc_id="x", clause_id="제1조", title="손해배상", text="제1조(손해배상) 손해를 배상한다."
-    )
+    q = Clause(doc_id="x", clause_id="제1조", title="손해배상", text="제1조(손해배상) 손해를 배상한다.")
     refs = retrieve_standard(q, index, k=3, doc_filter="subcontract_act")
     assert refs and {r.source_doc for r in refs} == {"subcontract_act"}
 

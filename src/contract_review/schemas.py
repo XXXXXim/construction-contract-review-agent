@@ -7,10 +7,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
-DISCLAIMER = (
-    "본 리포트는 법률 자문이 아닌 검토 보조 도구의 출력입니다. "
-    "최종 판단은 법률 전문가의 검토를 거치십시오."
-)
+DISCLAIMER = "본 리포트는 법률 자문이 아닌 검토 보조 도구의 출력입니다. 최종 판단은 법률 전문가의 검토를 거치십시오."
 
 
 class Category(StrEnum):
@@ -66,8 +63,11 @@ class RuleHit(BaseModel):
     risk_level: RiskLevel
     observed_value: str
     threshold_value: str
-    threshold_source: str  # 예: "하도급법.pdf 제n조"
+    threshold_source: str  # 예: "하도급법 제13조"
     evidence_quote: str
+    standard_doc: str = ""  # 인용이 있는 기준 문서 doc_id
+    standard_clause_id: str = ""
+    description: str = ""
 
 
 class Finding(BaseModel):
@@ -86,6 +86,9 @@ class ReportStats(BaseModel):
     elapsed_sec: float = 0.0
     input_tokens: int = 0
     output_tokens: int = 0
+    llm_calls: int = 0
+    dropped_findings: int = 0  # evidence_quote 검증 실패로 버린 수
+    retrieval_mode: str = ""
 
 
 class ReviewReport(BaseModel):

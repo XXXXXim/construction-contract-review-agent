@@ -34,9 +34,7 @@ def load_queries() -> list[dict]:
         doc = parse_document(ROOT / "data" / "synthetic" / f"{yml.stem}.txt", doc_id=yml.stem)
         clauses = {c.clause_id: c for c in split_clauses(doc)}
         for cid, std_cid in data["clause_map"].items():
-            out.append(
-                {"clause": clauses[cid], "gold": (STANDARD_DOC, std_cid), "labeled": cid in labeled}
-            )
+            out.append({"clause": clauses[cid], "gold": (STANDARD_DOC, std_cid), "labeled": cid in labeled})
     return out
 
 

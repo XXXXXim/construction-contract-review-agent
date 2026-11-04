@@ -2,12 +2,14 @@
 # tests/test_thresholds.py 가 quote 가 해당 조항 본문에 실제로 있는지 검증한다.
 # 기억으로 적은 숫자는 없다. 원문에 없는 값은 TODO(source-needed) 로 남긴다.
 #
+# worse_if: 계약서 값이 기준보다 greater/less 이면 수급사업자에게 불리. none = 규칙 비교 안 함
 # source_doc 값: subcontract_act | ftc_standard_subcontract | molit_standard_contract (scripts/inspect_raw.py 의 doc_id)
 
 thresholds:
   # ── 대금 지급 기한 ──
   - id: payment_deadline_days
     category: payment_deadline
+    worse_if: greater
     value: 60
     unit: days
     description: 하도급대금 지급기일은 목적물 인수일부터 60일 이내
@@ -20,6 +22,7 @@ thresholds:
       quote: "하도급대금의 지급기일은 목적물 인수일부터 60일을 초과하지 아니한다"
   - id: payment_after_owner_days
     category: payment_deadline
+    worse_if: greater
     value: 15
     unit: days
     description: 발주자로부터 준공금·기성금을 받은 날부터 15일 이내 지급
@@ -32,6 +35,7 @@ thresholds:
       quote: "준공금이나 기성금 등을 지급받은 날부터 15일(대금의 지급기일이 그 전에 도래하는 경우에는 그 지급기일) 이내에 수급사업자에게 지급한다"
   - id: advance_payment_days
     category: payment_deadline
+    worse_if: greater
     value: 15
     unit: days
     description: 발주자로부터 받은 선급금은 받은 날부터 15일 이내에 수급사업자에게 지급
@@ -44,6 +48,7 @@ thresholds:
       quote: "원사업자와 수급사업자는 협의하여 정한 선급금을 전문에서 정한 시기에 지급한다"
   - id: late_interest_rate_cap_pct
     category: payment_deadline
+    worse_if: none
     value: 40
     unit: percent_per_year
     description: 지연이자율 상한(연 100분의 40 이내에서 공정위 고시 이율)
@@ -54,6 +59,7 @@ thresholds:
   # ── 계약이행·대금지급 보증 (대금 지급 기한 카테고리에 포함) ──
   - id: payment_guarantee_days
     category: payment_deadline
+    worse_if: greater
     value: 30
     unit: days
     description: 원사업자는 계약체결일부터 30일 이내에 공사대금 지급보증
@@ -66,6 +72,7 @@ thresholds:
       quote: "원사업자는 계약체결일부터 30일 이내에 수급사업자에게 다음 각 호의 구분에 따라 이 계약에서 정한 계약금액의 지급을 보증"
   - id: performance_bond_pct
     category: payment_deadline
+    worse_if: greater
     value: 10
     unit: percent
     description: 수급사업자의 계약이행보증은 계약금액의 100분의 10
@@ -76,6 +83,7 @@ thresholds:
   # ── 설계변경과 대금 조정 ──
   - id: design_change_notice_days
     category: design_change
+    worse_if: greater
     value: 15
     unit: days
     description: 발주자로부터 증액·감액받은 날부터 15일 이내 사유·내용 통지
@@ -88,6 +96,7 @@ thresholds:
       quote: "증액 또는 감액받은 날부터 15일 이내에 발주자로부터 증액 또는 감액받은 사유와 내용을 수급사업자에게 통지한다"
   - id: design_change_adjust_days
     category: design_change
+    worse_if: greater
     value: 30
     unit: days
     description: 하도급대금 증액·감액은 발주자로부터 증액·감액받은 날부터 30일 이내
@@ -98,8 +107,18 @@ thresholds:
       source_doc: ftc_standard_subcontract
       clause_id: 제35조
       quote: "증액 또는 감액받은 날부터 30일 이내에 한다"
+  - id: design_change_newitem_pct
+    category: design_change
+    worse_if: less
+    value: 50
+    unit: percent
+    description: 발주자 요구 설계변경 시 신규비목 단가는 산정단가와 낙찰률 적용 금액 합의 100분의 50 이내에서 협의
+    source_doc: ftc_standard_subcontract
+    clause_id: 제35조
+    quote: "동 단가에 낙찰률을 곱한 금액을 합한 금액의 100분의 50이내에서 계약 당사자간에 협의하여 결정한다"
   - id: design_change_pay_days
     category: design_change
+    worse_if: greater
     value: 15
     unit: days
     description: 발주자로부터 증액 대금을 받은 날부터 15일 이내 증액 하도급대금 지급
@@ -110,6 +129,7 @@ thresholds:
   # ── 하자담보 책임 ──
   - id: defect_bond_refund_days
     category: defect_liability
+    worse_if: greater
     value: 10
     unit: days
     description: 하자보수 의무기간 종료 후 청구일부터 10일 이내 하자보수보증금 반환
@@ -118,6 +138,7 @@ thresholds:
     quote: "하자보수 의무기간이 종료한 후 수급사업자의 청구가 있는 날부터 10일 이내에 수급사업자에게 제1항의 하자보수보증금을 반환한다"
   - id: defect_liability_period_years
     category: defect_liability
+    worse_if: none
     value: null
     unit: years
     description: >-
@@ -130,6 +151,7 @@ thresholds:
   # ── 지체상금 ──
   - id: delay_penalty_rate
     category: delay_penalty
+    worse_if: none
     value: null
     unit: percent_per_day
     description: >-
@@ -141,6 +163,7 @@ thresholds:
     quote: "국가를 당사자로 하는 계약에 관한 법령 등에 따라 공공공사 계약체결시 적용되는 지체상금율을 따른다"
   - id: delay_penalty_bond_guarantee_limit_days
     category: delay_penalty
+    worse_if: none
     value: 30
     unit: days
     description: 보증기관 보증이행 시 지체일수 불산입 기간 상한 30일
@@ -151,6 +174,7 @@ thresholds:
   # ── 계약 해제·해지 ──
   - id: termination_amount_reduction_pct
     category: termination
+    worse_if: greater
     value: 40
     unit: percent
     description: 공사내용 변경으로 하도급대금이 100분의 40 이상 감소하면 해제·해지 사유
@@ -159,6 +183,7 @@ thresholds:
     quote: "원사업자가 공사내용을 변경함으로써 하도급대금이 100분의 40 이상 감소한 경우"
   - id: termination_suspension_pct
     category: termination
+    worse_if: greater
     value: 50
     unit: percent
     description: 수급사업자 책임 없는 공사 중지기간이 전체 공사기간의 100분의 50 이상이면 해제·해지 사유
@@ -169,6 +194,7 @@ thresholds:
   # ── 손해배상 한도 ──
   - id: damages_treble_multiplier
     category: damages_cap
+    worse_if: less
     value: 3
     unit: multiplier
     description: 원사업자의 특정 위반(부당 대금결정·감액 등)에 대한 손해배상은 손해의 3배 이내
@@ -181,6 +207,7 @@ thresholds:
       quote: "손해의 3배를 넘지 아니하는 범위에서 배상을 청구할 수 있다"
   - id: damages_quintuple_multiplier
     category: damages_cap
+    worse_if: less
     value: 5
     unit: multiplier
     description: 기술자료 유용에 대한 손해배상은 손해의 5배 이내

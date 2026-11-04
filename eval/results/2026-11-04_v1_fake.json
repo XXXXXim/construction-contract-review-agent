@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-04",
+  "config": "v1",
+  "llm": "fake",
+  "retrieval": "bm25",
+  "contracts": 3,
+  "labels": 24,
+  "findings": 22,
+  "recall": 0.9167,
+  "precision": 1.0,
+  "citation_accuracy": 1.0,
+  "risk_match": 0.5909,
+  "retrieval_hit3": 1.0,
+  "avg_sec_per_contract": 0.41,
+  "avg_input_tokens": 0,
+  "avg_output_tokens": 0,
+  "avg_llm_calls": 50.0,
+  "dropped_findings": 0,
+  "avg_cost_usd": null,
+  "per_contract": {
+    "synthetic_contract_01": {
+      "labels": 8,
+      "findings": 8,
+      "tp": 8,
+      "tp_findings": 8,
+      "cite_ok": 8,
+      "risk_ok": 5,
+      "hit3": 1.0,
+      "elapsed_sec": 0.41,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "llm_calls": 50,
+      "dropped": 0,
+      "missed": [],
+      "false_positives": []
+    },
+    "synthetic_contract_02": {
+      "labels": 8,
+      "findings": 6,
+      "tp": 6,
+      "tp_findings": 6,
+      "cite_ok": 6,
+      "risk_ok": 4,
+      "hit3": 1.0,
+      "elapsed_sec": 0.39,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "llm_calls": 50,
+      "dropped": 0,
+      "missed": [
+        "제18조/unfair_special_terms (unfair_safety_cost)",
+        "제44조/damages_cap (damages_cap_5pct)"
+      ],
+      "false_positives": []
+    },
+    "synthetic_contract_03": {
+      "labels": 8,
+      "findings": 8,
+      "tp": 8,
+      "tp_findings": 8,
+      "cite_ok": 8,
+      "risk_ok": 4,
+      "hit3": 1.0,
+      "elapsed_sec": 0.43,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "llm_calls": 50,
+      "dropped": 0,
+      "missed": [],
+      "false_positives": []
+    }
+  }
+}

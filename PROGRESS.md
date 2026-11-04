@@ -88,3 +88,30 @@
 
 **다음 할 일**
 - M4: `rule_check`, `llm_judge`(구조화 출력 + evidence_quote 검증), `report`, LangGraph 조립, `FakeLLM` E2E
+
+## 2026-11-04 · M4 규칙 + LLM 판정 + 근거 검증, M5 평가 하네스(fake), M6 UI
+**한 일**
+- `nodes/rule_check.py`: thresholds.yaml 의 인용문에서 숫자 자리를 `(\d+)` 로 바꾼 패턴으로 계약서 숫자를 읽어 `worse_if` 방향 비교. 같은 문형이 여러 번 나오는 조항(손해의 3배/5배)은 표준에서의 등장 순서로 짝을 맞춤. 법령 출처면 high, 표준계약서 출처면 medium
+- `llm.py`: `JudgeLLM` 프로토콜, `FakeLLM`(표준 top-1 과 문장 단위 diff, 결정적), openai/anthropic 은 langchain, 키는 환경변수만
+- `nodes/llm_judge.py`: 프롬프트(카테고리 가이드, 규칙 결과, 계약 조항, 표준 top-3 태그) → JSON finding → **근거 검증**: standard_ref 가 준 후보 중 하나이고 evidence_quote 가 그 조항 본문에 공백 무시로 존재해야 통과, 아니면 폐기(dropped 집계)
+- `nodes/report.py`, `graph.py`(LangGraph, baseline/v1/v2 경로 분기), `eval.py`(recall/precision/citation/hit@3/risk_match/시간/토큰, 비교표)
+- `app/streamlit_app.py`, `Dockerfile`, `.dockerignore`
+- 테스트 47개 통과: 날조 인용 폐기, 규칙 판정, fake E2E, baseline 그래프
+
+**숫자 (fake 판정기, 실제 LLM 아님 — 하네스 동작 확인용)**
+| config | recall | precision | citation | hit@3 | risk_match | 초/계약서 |
+|---|---|---|---|---|---|---|
+| baseline | 0.00 | – | – | – | – | 0.01 |
+| v1 | 0.92 | 1.00 | 1.00 | 1.00 | 0.59 | 0.41 |
+| v2 | 0.92 | 1.00 | 1.00 | 1.00 | 0.45 | 0.42 |
+- fake 가 놓친 2건은 "문장 추가형" 변형(산안비 전액 부담 추가, 배상 상한 5% 추가) — 문장 삭제·치환만 보는 diff 의 한계. baseline 0 은 fake 가 전체 문서 프롬프트를 처리하지 못해서이며 의미 없는 값
+- v2 risk_match 가 v1 보다 낮은 이유: 규칙 레이어가 법령 출처 위반을 high 로 올리는데 라벨 일부(예: 조정 기한 30→90일)는 medium 으로 적혀 있음. 라벨은 고치지 않고 그대로 둠 (규칙 9)
+- 규칙 레이어 단독 적중: 계약서당 평균 4건 (숫자형 변형 12개 중 12개)
+
+**막힌 것 / 보고 사항**
+- **실제 LLM 측정 불가: OPENAI_API_KEY / ANTHROPIC_API_KEY 없음.** 키가 오면 `make eval-baseline && make eval CONFIG=v1 && make eval` 3번 + `--compare` 로 진짜 비교표가 나온다
+- `docker build` 미검증 (세션에 docker 데몬 없음)
+- 비용(USD)은 단가를 기억으로 쓰지 않기 위해 `PRICE_IN_PER_1M`/`PRICE_OUT_PER_1M` 환경변수가 있을 때만 계산
+
+**다음 할 일**
+- M7 README 케이스 스터디 → 키 확보 후 실제 LLM 평가 → README 숫자 교체 → 최종 보고

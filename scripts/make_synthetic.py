@@ -314,11 +314,7 @@ def build_contract(
         if len(chosen) == k:
             break
     # 2) 변형 대상이 아니고 제1·2조(목적·정의)가 아닌 조항 중 drop 개 삭제
-    droppable = [
-        c.clause_id
-        for c in standard
-        if c.clause_id not in used and c.clause_id not in {"제1조", "제2조"}
-    ]
+    droppable = [c.clause_id for c in standard if c.clause_id not in used and c.clause_id not in {"제1조", "제2조"}]
     dropped = set(rng.sample(droppable, drop))
     kept = [c for c in standard if c.clause_id not in dropped]
     # 3) 재번호 + 변형 주입 + 당사자 명칭 치환
