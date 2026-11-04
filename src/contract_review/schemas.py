@@ -47,6 +47,7 @@ class Clause(BaseModel):
     clause_id: str  # 예: "제12조"
     title: str = ""
     text: str
+    section: str = "main"  # main | annexN | 부칙 | future (split_clauses 참고)
 
 
 class RetrievedRef(BaseModel):

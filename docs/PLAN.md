@@ -7,14 +7,14 @@
 - [x] `Makefile` (setup/test/eval/eval-baseline/run/lint), `.env.example`, `.gitignore`
 - [x] `pyproject.toml` (허용 의존성만), 패키지 골격, pydantic 스키마 초안
 - [x] `make test` 통과 (스모크 테스트)
-- [ ] SPEC 보고 → **보스 승인 대기**
+- [x] SPEC 보고 → 보스 확인 (레포 생성·원문 제공으로 진행 승인)
 
 ## M1: PDF 파싱, 조항 분할
-- [ ] `data/raw/`에 원문 3종 확인 (없으면 멈추고 목록 보고)
-- [ ] `parse` 노드 (pypdf), `split_clauses` 노드 ("제n조(제목)" 패턴)
-- [ ] 표준계약서 3종의 조항 수와 제목 표 출력 (`scripts/inspect_raw.py`)
-- [ ] SPEC 5절 카테고리 표를 원문 출처로 채움 (기준값 + 파일명/조항)
-- [ ] 단위 테스트 통과
+- [x] `data/raw/`에 원문 3종 확인 (HWP는 txt로 변환)
+- [x] `parse` 노드 (pypdf), `split_clauses` 노드 ("제n조(제목)" 패턴)
+- [x] 표준계약서 3종의 조항 수와 제목 표 출력 (`scripts/inspect_raw.py` → `docs/raw_clauses.md`)
+- [x] SPEC 5절 카테고리 표를 원문 출처로 채움 (`data/thresholds.yaml` + 인용 검증 테스트)
+- [x] 단위 테스트 통과 (33 passed)
 
 ## M2: 합성 평가셋
 - [ ] `scripts/make_synthetic.py` (시드 고정): 표준하도급계약서 기반 계약서 3개 × 변형 7~10개
