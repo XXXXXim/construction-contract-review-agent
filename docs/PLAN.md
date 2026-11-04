@@ -43,7 +43,7 @@
 ## M6: Streamlit UI + Dockerfile
 - [x] PDF 업로드 → 리포트 표시/다운로드 (`app/streamlit_app.py`)
 - [x] `make run` 기동 확인 (헬스체크 ok)
-- [ ] `docker build` ← 이 세션에 docker 데몬이 없어 **미검증**. 보스 맥에서 `docker build -t contract-review .` 확인 필요
+- [x] `docker build` 성공 + 컨테이너 안에서 v2 파이프라인 실행·UI 헬스체크 ok (세션 프록시 CA만 추가한 검증용 Dockerfile 사용, 커밋된 Dockerfile은 그대로)
 
 ## M7: README 케이스 스터디
 - [x] 문제 정의, 아키텍처(Mermaid), 비교표(fake), 한계, 다음 단계 (실제 LLM 숫자는 키 확보 후 교체)

@@ -19,8 +19,15 @@ from collections import Counter
 
 from contract_review.schemas import Clause, ParsedDocument
 
-ARTICLE_RE = re.compile(r"^\s*제(\d+)조(?:의(\d+))?\s*\(([^)]{1,60})\)\s*(.*)$")
-CHAPTER_RE = re.compile(r"^\s*제\d+장\s")
+# 제1조(목적) / 제 1 조 (목적) / 제1조【목적】 / 제1조의2[목적] / 전각 괄호（）
+ARTICLE_RE = re.compile(r"^\s*제\s*(\d+)\s*조(?:\s*의\s*(\d+))?\s*[(（【\[]\s*([^)）】\]]{1,60}?)\s*[)）】\]]\s*(.*)$")
+# 괄호 없이 제목만 있는 줄: "제1조 목적". 본문 참조("제4조 제2항을 준용한다", "제5조 및 제6조")와
+# 구분하려고 줄 전체가 한글 제목(2~20자)이고 접속·조사로 시작하지 않을 때만 인정한다.
+ARTICLE_BARE_RE = re.compile(
+    r"^\s*제\s*(\d+)\s*조(?:\s*의\s*(\d+))?\s+"
+    r"(?!및|또는|내지|부터|까지|에|의|와|과|를|을|은|는|에서|에도|중)([가-힣][가-힣ㆍ·\s]{0,18}[가-힣])\s*$"
+)
+CHAPTER_RE = re.compile(r"^\s*제\s*\d+\s*장\s")
 ADDENDUM_RE = re.compile(r"^\s*부\s*칙(\s|<|$)")
 FUTURE_RE = re.compile(r"^\s*\[시행일:\s*[\d.\s]+\]\s*제\d+조(?:의\d+)?\s*$")
 PLACEHOLDER_RE = re.compile(r"^\s*<(표|그림)>\s*$")
@@ -70,7 +77,7 @@ def split_clauses(doc: ParsedDocument) -> list[Clause]:
         if CHAPTER_RE.match(line):
             flush()
             continue
-        m = ARTICLE_RE.match(line)
+        m = ARTICLE_RE.match(line) or ARTICLE_BARE_RE.match(line)
         if m:
             flush()
             num = _article_num(m)

@@ -16,6 +16,8 @@
   "avg_output_tokens": 0,
   "avg_llm_calls": 1.0,
   "dropped_findings": 0,
+  "llm_errors": 0,
+  "unparsed_responses": 0,
   "avg_cost_usd": null,
   "per_contract": {
     "synthetic_contract_01": {
@@ -26,11 +28,13 @@
       "cite_ok": 0,
       "risk_ok": 0,
       "hit3": null,
-      "elapsed_sec": 0.01,
+      "elapsed_sec": 0.02,
       "input_tokens": 0,
       "output_tokens": 0,
       "llm_calls": 1,
       "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
       "missed": [
         "제31조/design_change (dc_adjust_30_to_90)",
         "제34조/payment_deadline (pay_cash_ratio_removed)",
@@ -56,6 +60,8 @@
       "output_tokens": 0,
       "llm_calls": 1,
       "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
       "missed": [
         "제18조/unfair_special_terms (unfair_safety_cost)",
         "제29조/design_change (dc_pay_15_to_60)",
@@ -81,6 +87,8 @@
       "output_tokens": 0,
       "llm_calls": 1,
       "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
       "missed": [
         "제28조/design_change (dc_pay_15_to_60)",
         "제33조/payment_deadline (pay_60_to_90)",
@@ -93,5 +101,7 @@
       ],
       "false_positives": []
     }
-  }
+  },
+  "truncated_calls": 0,
+  "cache_hits": 0
 }

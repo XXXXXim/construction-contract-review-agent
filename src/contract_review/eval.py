@@ -42,7 +42,12 @@ def load_cases() -> dict[str, list[EvalCase]]:
 
 def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dict:
     labels = {(c.clause_id, c.category): c for c in cases}
-    findings = [f for f in report.findings if f.risk_level.value != "none"]
+    # (clause_id, category) 단위로 센다. 같은 키의 중복 finding 이 precision 을 부풀리지 않게
+    uniq: dict[tuple, object] = {}
+    for f in report.findings:
+        if f.risk_level.value != "none":
+            uniq.setdefault((f.clause_id, f.category), f)
+    findings = list(uniq.values())
     tp_keys: set[tuple[str, str]] = set()
     tp_findings = []
     for f in findings:
@@ -72,6 +77,8 @@ def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dic
         "output_tokens": report.stats.output_tokens,
         "llm_calls": report.stats.llm_calls,
         "dropped": report.stats.dropped_findings,
+        "llm_errors": report.stats.llm_errors,
+        "unparsed": report.stats.unparsed_responses,
         "missed": [
             f"{c.clause_id}/{c.category.value} ({c.mutation_id})"
             for c in cases
@@ -98,6 +105,8 @@ def aggregate(per: dict[str, dict], config: str, llm_name: str, retrieval_mode: 
             "output_tokens",
             "llm_calls",
             "dropped",
+            "llm_errors",
+            "unparsed",
         )
     }
     hit3s = [p["hit3"] for p in per.values() if p["hit3"] is not None]
@@ -123,6 +132,8 @@ def aggregate(per: dict[str, dict], config: str, llm_name: str, retrieval_mode: 
         "avg_output_tokens": s["output_tokens"] // n,
         "avg_llm_calls": s["llm_calls"] / n,
         "dropped_findings": s["dropped"],
+        "llm_errors": s["llm_errors"],
+        "unparsed_responses": s["unparsed"],
         "avg_cost_usd": round(cost, 4) if cost is not None else None,
         "per_contract": per,
     }
@@ -140,7 +151,8 @@ def render_result(r: dict) -> str:
     lines = [
         f"# 평가 결과: {r['config']} ({r['date']})",
         "",
-        f"- LLM: `{r['llm']}` · 검색: `{r['retrieval']}` · 계약서 {r['contracts']}개 · 라벨 {r['labels']}개 · finding {r['findings']}개",
+        f"- LLM: `{r['llm']}` · 검색: `{r['retrieval']}` · 계약서 {r['contracts']}개 · "
+        f"라벨 {r['labels']}개 · finding {r['findings']}개",
         "",
         "| 지표 | 값 |",
         "|---|---|",
@@ -153,6 +165,8 @@ def render_result(r: dict) -> str:
         f"| 계약서당 토큰 (입력/출력) | {r['avg_input_tokens']:,} / {r['avg_output_tokens']:,} |",
         f"| 계약서당 LLM 호출 | {_fmt(r['avg_llm_calls'])} |",
         f"| 근거 검증으로 제외된 finding | {r['dropped_findings']} |",
+        f"| LLM 호출 실패 / JSON 파싱 실패 | {r.get('llm_errors', 0)} / {r.get('unparsed_responses', 0)} |",
+        f"| max_tokens 로 잘린 응답 / 캐시 적중 | {r.get('truncated_calls', 0)} / {r.get('cache_hits', 0)} |",
         f"| 계약서당 비용(USD) | {_fmt(r['avg_cost_usd'])} |",
         "",
         "## 계약서별",
@@ -177,7 +191,15 @@ def run_eval(config: str, llm_provider: str | None = None) -> dict:
     for cid, cases in load_cases().items():
         out = pipe.run(SYN / f"{cid}.txt", contract_id=cid)
         per[cid] = score(out["report"], cases, out.get("refs") if pipe.config.split else None)
-    return aggregate(per, config, pipe.llm.name, pipe.index.mode)
+    r = aggregate(per, config, pipe.llm.name, pipe.index.mode)
+    r["truncated_calls"] = getattr(pipe.llm, "truncated_calls", 0)
+    r["cache_hits"] = getattr(pipe.llm, "hits", 0)
+    if r["llm_errors"] or r["unparsed_responses"] or r["truncated_calls"]:
+        print(
+            f"⚠️ LLM 실패 {r['llm_errors']} · 파싱 실패 {r['unparsed_responses']} · 잘림 {r['truncated_calls']}"
+            " — 이 결과의 recall 은 실패만큼 과소평가됨"
+        )
+    return r
 
 
 def save_result(r: dict) -> Path:

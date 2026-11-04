@@ -14,10 +14,10 @@ import re
 
 from contract_review.schemas import Category, Clause, RetrievedRef, RiskLevel, RuleHit
 from contract_review.standards import DOC_LABELS
+from contract_review.textnorm import canon
 from contract_review.thresholds import Threshold, rule_thresholds
 
 _PARTY = re.compile(r"원사업자|수급사업자|발주자|도급인|수급인|갑|을")
-_WS = re.compile(r"\s+")
 
 UNIT_LABEL = {
     "days": "일",
@@ -29,8 +29,8 @@ UNIT_LABEL = {
 
 
 def _norm(text: str) -> str:
-    """공백 제거 + 당사자 명칭을 'P'로 치환."""
-    return _PARTY.sub("P", _WS.sub("", text))
+    """공백 제거·문장부호 통일 + 당사자 명칭을 'P'로 치환."""
+    return _PARTY.sub("P", canon(text))
 
 
 def _pattern_for(quote: str, value: float) -> re.Pattern[str] | None:

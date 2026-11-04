@@ -23,7 +23,8 @@ from contract_review.schemas import (
     RiskLevel,
     RuleHit,
 )
-from contract_review.standards import DOC_LABELS, normalize_ws
+from contract_review.standards import DOC_LABELS
+from contract_review.textnorm import contains_quote
 
 # 표준하도급계약서 조항 → 검토 카테고리 (docs/SPEC.md 5절 표와 동일)
 FTC_CLAUSE_CATEGORY: dict[str, Category] = {
@@ -111,7 +112,8 @@ evidence_quote 는 반드시 해당 표준 조항 본문에 **글자 그대로**
 """
 
 
-_JSON_RE = re.compile(r"\[.*\]", re.S)
+_FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)```", re.S)
+_FLAT_OBJ_RE = re.compile(r"\{[^{}]*\}", re.S)  # finding 은 중첩 없는 평평한 객체
 _REF_RE = re.compile(r"(\w+)\s+(제\d+조(?:의\d+)?)")
 
 
@@ -121,17 +123,67 @@ class JudgeResult:
     dropped: int
     input_tokens: int
     output_tokens: int
+    error: bool = False
+    unparsed: bool = False
 
 
-def _parse(raw: str) -> list[dict]:
-    m = _JSON_RE.search(raw)
-    if not m:
+def _from_json(data: object) -> list[dict] | None:
+    if isinstance(data, list):
+        return [d for d in data if isinstance(d, dict)]
+    if isinstance(data, dict):
+        # {"findings": [...]} 처럼 감싼 경우, 또는 finding 하나만 객체로 준 경우
+        for v in data.values():
+            if isinstance(v, list) and all(isinstance(x, dict) for x in v):
+                return v
+        if "category" in data:
+            return [data]
         return []
-    try:
-        data = json.loads(m.group())
-    except json.JSONDecodeError:
+    return None
+
+
+def _parse(raw: str) -> list[dict] | None:
+    """LLM 응답에서 finding dict 목록을 꺼낸다. 하나도 못 읽으면 None.
+
+    1) 코드펜스 제거 2) 전체를 JSON 으로 3) 첫 '['/'{' 부터 JSON 으로
+    4) 잘린 응답(max_tokens) 복구: 평평한 객체 {...} 를 하나씩 읽는다.
+    """
+    text = raw.strip()
+    fence = _FENCE_RE.search(text)
+    if fence:
+        text = fence.group(1).strip()
+    if text in ("", "[]"):
         return []
-    return [d for d in data if isinstance(d, dict)]
+    candidates = [text]
+    starts = [i for i in (text.find("["), text.find("{")) if i >= 0]
+    if starts:
+        candidates.append(text[min(starts) :])
+    for cand in candidates:
+        try:
+            got = _from_json(json.loads(cand))
+        except json.JSONDecodeError:
+            continue
+        if got is not None:
+            return got
+    objs: list[dict] = []
+    for m in _FLAT_OBJ_RE.finditer(text):
+        try:
+            d = json.loads(m.group())
+        except json.JSONDecodeError:
+            continue
+        if isinstance(d, dict) and "category" in d:
+            objs.append(d)
+    return objs or None
+
+
+def dedupe_findings(findings: list[Finding]) -> list[Finding]:
+    """(clause_id, category) 당 하나만 남긴다. 규칙 판정 > 높은 위험도 > 먼저 나온 것."""
+    best: dict[tuple[str, Category], Finding] = {}
+    for f in findings:
+        key = (f.clause_id, f.category)
+        cur = best.get(key)
+        if cur is None or (f.source == "rule", f.risk_level.rank) > (cur.source == "rule", cur.risk_level.rank):
+            best[key] = f
+    return list(best.values())
 
 
 def llm_judge(
@@ -143,11 +195,15 @@ def llm_judge(
 ) -> JudgeResult:
     if not refs:
         return JudgeResult([], 0, 0, 0)
-    raw, tin, tout = llm.complete(build_prompt(clause, refs, rule_hits))
+    try:
+        raw, tin, tout = llm.complete(build_prompt(clause, refs, rule_hits))
+    except Exception:  # noqa: BLE001 — 재시도 후에도 실패한 호출 하나가 전체 평가를 멈추지 않게
+        return JudgeResult([], 0, 0, 0, error=True)
     by_ref = {(r.source_doc, r.clause_id): r for r in refs}
     findings: list[Finding] = []
     dropped = 0
-    for d in _parse(raw):
+    parsed = _parse(raw)
+    for d in parsed or []:
         try:
             category = Category(d.get("category", "other"))
             risk = RiskLevel(d.get("risk_level", "medium"))
@@ -159,10 +215,9 @@ def llm_judge(
         ref_m = _REF_RE.search(str(d.get("standard_ref", "")))
         quote = str(d.get("evidence_quote", "")).strip()
         ref = by_ref.get((ref_m.group(1), ref_m.group(2))) if ref_m else None
-        if verify:
-            if ref is None or len(normalize_ws(quote)) < 8 or normalize_ws(quote) not in normalize_ws(ref.text):
-                dropped += 1
-                continue
+        if verify and (ref is None or not contains_quote(ref.text, quote)):
+            dropped += 1
+            continue
         label = (
             f"{DOC_LABELS.get(ref.source_doc, ref.source_doc)} {ref.clause_id}"
             if ref
@@ -180,7 +235,7 @@ def llm_judge(
                 source="llm",
             )
         )
-    return JudgeResult(findings, dropped, tin, tout)
+    return JudgeResult(findings, dropped, tin, tout, unparsed=parsed is None)
 
 
 def rule_hit_to_finding(h: RuleHit, clause: Clause) -> Finding:
@@ -218,10 +273,14 @@ JSON 배열만 출력하세요. 각 원소:
 """
 
 
-def parse_baseline(raw: str, clauses: dict[str, Clause]) -> list[Finding]:
+def parse_baseline(raw: str, clauses: dict[str, Clause]) -> list[Finding] | None:
+    """None = JSON 을 하나도 못 읽음."""
+    parsed = _parse(raw)
+    if parsed is None:
+        return None
     out: list[Finding] = []
-    for d in _parse(raw):
-        cid = str(d.get("clause_id", "")).replace(" ", "")
+    for d in parsed:
+        cid = re.sub(r"\s+", "", str(d.get("clause_id", "")))
         if cid not in clauses:
             continue
         try:
@@ -243,4 +302,4 @@ def parse_baseline(raw: str, clauses: dict[str, Clause]) -> list[Finding]:
                 source="llm",
             )
         )
-    return out
+    return dedupe_findings(out)

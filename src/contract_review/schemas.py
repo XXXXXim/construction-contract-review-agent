@@ -88,6 +88,8 @@ class ReportStats(BaseModel):
     output_tokens: int = 0
     llm_calls: int = 0
     dropped_findings: int = 0  # evidence_quote 검증 실패로 버린 수
+    llm_errors: int = 0  # 재시도 후에도 실패한 LLM 호출 수 (해당 조항은 판정 없음)
+    unparsed_responses: int = 0  # JSON 을 하나도 못 읽은 응답 수
     retrieval_mode: str = ""
 
 

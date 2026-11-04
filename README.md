@@ -88,6 +88,10 @@ make run                        # Streamlit: PDF 업로드 → 리포트
 docker build -t contract-review . && docker run -p 8501:8501 --env-file .env contract-review
 ```
 
+실제 LLM 평가 팁: `LLM_CACHE=1`이면 같은 프롬프트 응답을 `.cache/llm/`에 저장해 재실행 비용이 0이 된다
+(처리 시간 지표는 캐시를 끄고 잰다). 429/5xx는 `LLM_MAX_RETRIES`(기본 5)만큼 지수 백오프로 재시도하고,
+그래도 실패한 호출은 그 조항만 빠지고 결과표에 "LLM 호출 실패" 수로 남는다.
+
 CLI로 리포트 1건:
 ```bash
 .venv/bin/python -c "from pathlib import Path; from contract_review.graph import Pipeline; from contract_review.nodes.report import write_report; o=Pipeline('v2').run('data/synthetic/synthetic_contract_01.txt'); print(write_report(o['report'], Path('outputs')))"
@@ -99,7 +103,10 @@ CLI로 리포트 1건:
 2. **원문에 없는 기준값**: 지체상금 요율(국가계약법 시행규칙), 하자담보책임기간 상한(건설산업기본법 시행령)은 원문이 없어 규칙에서 뺐다. 이 카테고리는 LLM 판정에만 의존한다.
 3. **HWP 직접 파싱 미지원**: 표준하도급계약서는 1회 변환한 txt를 쓴다. 스캔 PDF(OCR)도 비범위.
 4. **근거 검증은 "인용이 실존하는가"만 본다**: 인용이 실제로 그 지적을 뒷받침하는지(관련성)는 검증하지 않는다.
-5. 실제 LLM 비교 수치 미측정 (API 키 확보 후 채움).
+   문장부호 차이(ㆍ/·, 「」/"", 전각 괄호)와 "…" 생략 인용은 허용한다 (`textnorm.py`).
+5. **규칙 레이어는 문형이 표준과 같을 때만 숫자를 읽는다**: 문장을 통째로 바꿔 쓴 계약서면 규칙은 조용히 빠지고 LLM 이 판정한다.
+   오탐은 늘지 않지만, 합성셋의 규칙 적중률(숫자형 변형 12/12)은 실제 계약서에서 낮아질 것이다.
+6. 실제 LLM 비교 수치 미측정 (API 키 확보 후 채움).
 
 ## 6. 다음 단계
 

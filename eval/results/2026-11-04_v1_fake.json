@@ -11,11 +11,13 @@
   "citation_accuracy": 1.0,
   "risk_match": 0.5909,
   "retrieval_hit3": 1.0,
-  "avg_sec_per_contract": 0.41,
+  "avg_sec_per_contract": 0.65,
   "avg_input_tokens": 0,
   "avg_output_tokens": 0,
   "avg_llm_calls": 50.0,
   "dropped_findings": 0,
+  "llm_errors": 0,
+  "unparsed_responses": 0,
   "avg_cost_usd": null,
   "per_contract": {
     "synthetic_contract_01": {
@@ -26,11 +28,13 @@
       "cite_ok": 8,
       "risk_ok": 5,
       "hit3": 1.0,
-      "elapsed_sec": 0.41,
+      "elapsed_sec": 0.92,
       "input_tokens": 0,
       "output_tokens": 0,
       "llm_calls": 50,
       "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
       "missed": [],
       "false_positives": []
     },
@@ -42,11 +46,13 @@
       "cite_ok": 6,
       "risk_ok": 4,
       "hit3": 1.0,
-      "elapsed_sec": 0.39,
+      "elapsed_sec": 0.62,
       "input_tokens": 0,
       "output_tokens": 0,
       "llm_calls": 50,
       "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
       "missed": [
         "제18조/unfair_special_terms (unfair_safety_cost)",
         "제44조/damages_cap (damages_cap_5pct)"
@@ -61,13 +67,17 @@
       "cite_ok": 8,
       "risk_ok": 4,
       "hit3": 1.0,
-      "elapsed_sec": 0.43,
+      "elapsed_sec": 0.41,
       "input_tokens": 0,
       "output_tokens": 0,
       "llm_calls": 50,
       "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
       "missed": [],
       "false_positives": []
     }
-  }
+  },
+  "truncated_calls": 0,
+  "cache_hits": 0
 }

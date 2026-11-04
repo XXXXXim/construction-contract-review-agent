@@ -12,6 +12,7 @@ from pathlib import Path
 from contract_review.nodes.parse import parse_document
 from contract_review.nodes.split_clauses import body_clauses, split_clauses
 from contract_review.schemas import Clause
+from contract_review.textnorm import canon, contains_quote
 
 ROOT = Path(__file__).resolve().parents[2]
 RAW = ROOT / "data" / "raw"
@@ -33,8 +34,8 @@ _WS = re.compile(r"\s+")
 
 
 def normalize_ws(text: str) -> str:
-    """공백·줄바꿈을 전부 제거. 인용문 검증은 이 형태로 비교한다 (PDF 줄바꿈 차이 흡수)."""
-    return _WS.sub("", text)
+    """공백 제거 + 문장부호 통일 (textnorm.canon). 인용문 검증은 이 형태로 비교한다."""
+    return canon(text)
 
 
 @lru_cache(maxsize=1)
@@ -55,16 +56,15 @@ def find_clause(doc_id: str, clause_id: str) -> Clause | None:
 def quote_in_clause(quote: str, doc_id: str, clause_id: str) -> bool:
     """quote 가 해당 기준 조항 본문에 실제로 있는지 (공백 무시)."""
     c = find_clause(doc_id, clause_id)
-    return c is not None and normalize_ws(quote) in normalize_ws(c.text)
+    # 사람이 고른 기준값 인용(thresholds.yaml)은 "손해의 3배 이내"처럼 짧을 수 있어 길이 하한 없음.
+    # LLM 인용 검증은 llm_judge 에서 contains_quote(min_len=8)로 따로 한다.
+    return c is not None and contains_quote(c.text, quote, min_len=1)
 
 
 def quote_in_any_standard(quote: str) -> tuple[str, str] | None:
     """quote 가 기준 문서 어딘가에 있으면 (doc_id, clause_id)를 돌려준다."""
-    q = normalize_ws(quote)
-    if len(q) < 8:
-        return None
     for doc_id, clauses in load_standard_clauses().items():
         for c in clauses:
-            if q in normalize_ws(c.text):
+            if contains_quote(c.text, quote):
                 return doc_id, c.clause_id
     return None

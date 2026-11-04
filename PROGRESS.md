@@ -115,3 +115,27 @@
 
 **다음 할 일**
 - M7 README 케이스 스터디 → 키 확보 후 실제 LLM 평가 → README 숫자 교체 → 최종 보고
+
+## 2026-11-04 · 결함 분석 후 수정 (fix)
+**찾은 결함과 수정**
+| # | 결함 | 수정 | 테스트 |
+|---|---|---|---|
+| 1 | 조항 머리가 `제1조(목적)` 형식만 인식 → `제 1 조 (목적)`, `제1조【목적】`, `제1조 목적` 이면 조항 0개 | 공백·【】·[]·전각 괄호 허용, 괄호 없는 제목줄은 한글 제목만 있고 조사·접속어로 시작하지 않을 때만 인정 | `test_split_accepts_header_variants` 외 |
+| 2 | 근거 검증이 문장부호 차이(원문 ㆍ U+318D vs LLM · U+00B7)로 **진짜 인용을 버림** → v2 recall 과소평가 | `textnorm.canon`: 문장부호 통일 + NFKC. **NFKC 가 ㆍ를 ᆞ(U+119E)로 바꾸는 문제를 테스트가 잡아** 정규화 전후 모두 매핑. "…" 생략 인용은 조각별 검증 | `test_quote_match_ignores_punctuation_variants` |
+| 5 | baseline 출력이 max_tokens(4096)에 잘리면 JSON 파싱 실패 → recall 0 | max_tokens 16000(LLM_MAX_TOKENS), 잘린 배열에서 완성된 객체만 복구, 잘림 횟수 집계 | `test_parse_recovers_truncated_array` |
+| 6 | API 오류 1번에 평가 전체 중단 | max_retries=5(지수 백오프), 실패 호출은 그 조항만 제외하고 `llm_errors` 집계, 선택적 디스크 캐시(LLM_CACHE=1) | `test_llm_error_is_isolated_per_clause`, `test_cached_llm_reuses_response` |
+| 7 | 응답이 `{"findings":[…]}`/코드펜스/설명문 섞이면 0건 | 파서가 코드펜스·객체 감싸기·앞뒤 설명문 처리, 못 읽으면 `unparsed_responses` 집계 | `test_parse_variants` |
+| 8 | 같은 조항·카테고리 중복 finding 이 precision 부풀림 | 파이프라인에서 (조항, 카테고리) dedupe(규칙 > 높은 위험도), 평가도 고유 키로 계산 | `test_dedupe_prefers_rule_then_higher_risk`, `test_precision_counts_unique_clause_category` |
+| + | **평가 하네스(`eval.py`)에 테스트가 없어** 수정 중 KeyError 로 깨진 걸 pytest 가 못 잡음 | `tests/test_eval.py` 추가 (v2·baseline 끝까지 실행) | – |
+| 3 | docker build 미검증 | 세션에서 dockerd 기동해 빌드. 처음엔 pip 가 **세션 프록시 CA** 를 못 믿어 실패(Dockerfile 문제 아님) → 프록시 CA만 추가한 검증용 Dockerfile 로 빌드 성공, 컨테이너 안 v2 실행·UI 헬스체크 ok | – |
+
+**숫자**
+- `make test`: **68 passed** (47 → 68) · `make lint`: 통과
+- fake 비교표는 변화 없음 (baseline 0.00 / v1 0.92 / v2 0.92 recall). 이번 결함들은 실제 LLM 출력·실제 계약서에서만 드러나는 종류라 fake 로는 수치가 안 움직이는 게 정상
+
+**남은 것**
+- 실제 LLM 측정 (API 키 필요) — 4·10번(실제 hit@3, 실제 오탐)은 키 + 실제 계약서 샘플이 있어야 검증 가능
+- 미착수: 정상 조항 LLM 호출 생략(비용 절감). 합성셋에선 "원문 복사 조항 건너뛰기"가 수치를 부풀릴 수 있어 보류
+
+**다음 할 일**
+- API 키 확보 → `LLM_CACHE=1 make eval-baseline && make eval CONFIG=v1 && make eval` → `--compare` → README 숫자 교체

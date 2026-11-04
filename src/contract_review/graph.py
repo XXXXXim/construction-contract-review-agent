@@ -20,7 +20,7 @@ from pydantic import BaseModel
 
 from contract_review.config import Settings, load_settings
 from contract_review.llm import JudgeLLM, get_llm
-from contract_review.nodes.llm_judge import llm_judge, rule_hit_to_finding
+from contract_review.nodes.llm_judge import dedupe_findings, llm_judge, rule_hit_to_finding
 from contract_review.nodes.parse import parse_document
 from contract_review.nodes.report import render_markdown
 from contract_review.nodes.retrieve_standard import retrieve_standard
@@ -119,9 +119,10 @@ class Pipeline:
             st.input_tokens += res.input_tokens
             st.output_tokens += res.output_tokens
             st.dropped_findings += res.dropped
-            taken = {(f.clause_id, f.category) for f in findings}  # 규칙 판정 우선
-            findings += [f for f in res.findings if (f.clause_id, f.category) not in taken]
-        return {"findings": findings}
+            st.llm_errors += res.error
+            st.unparsed_responses += res.unparsed
+            findings += res.findings
+        return {"findings": dedupe_findings(findings)}  # 같은 조항·카테고리는 규칙 판정 우선
 
     def n_judge_whole(self, s: ReviewState) -> ReviewState:
         """baseline: 계약서 전체를 한 조항처럼 LLM 에 한 번에 넣는다. 검색·규칙·검증 없음."""
@@ -131,14 +132,17 @@ class Pipeline:
         clauses = split_clauses(doc)  # 지표 계산용 clause_id 는 유지
         st = s["stats"]
         st.clause_count = len(clauses)
-        raw, tin, tout = self.llm.complete(build_baseline_prompt(doc, self.index))
         st.llm_calls += 1
+        try:
+            raw, tin, tout = self.llm.complete(build_baseline_prompt(doc, self.index))
+        except Exception:  # noqa: BLE001
+            st.llm_errors += 1
+            return {"clauses": clauses, "findings": []}
         st.input_tokens += tin
         st.output_tokens += tout
-        return {
-            "clauses": clauses,
-            "findings": parse_baseline(raw, {c.clause_id: c for c in clauses}),
-        }
+        found = parse_baseline(raw, {c.clause_id: c for c in clauses})
+        st.unparsed_responses += found is None
+        return {"clauses": clauses, "findings": found or []}
 
     def n_report(self, s: ReviewState) -> ReviewState:
         report = ReviewReport(
