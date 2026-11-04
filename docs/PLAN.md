@@ -23,9 +23,9 @@
 - [x] 해시 비교 테스트로 재현성 확인 (`tests/test_synthetic.py`)
 
 ## M3: 검색 + 검색 평가
-- [ ] 표준 조항 인덱스 (BM25, 임베딩 선택적)
-- [ ] `retrieve_standard` 노드, 임베딩 없을 때 BM25 폴백
-- [ ] hit@3 측정 → PROGRESS 기록 (BM25 단독 vs 하이브리드)
+- [x] 표준 조항 인덱스 (BM25 어절+2-gram, 임베딩은 EMBEDDING_PROVIDER=openai 때 RRF 하이브리드)
+- [x] `retrieve_standard` 노드, 임베딩 없을 때 BM25 폴백
+- [x] hit@3 측정 → PROGRESS 기록 (BM25 단독; 하이브리드는 키 확보 후 측정)
 
 ## M4: 규칙 레이어 + LLM 판정 + 근거 검증
 - [ ] `rule_check` (원문 추출 기준값 사용)

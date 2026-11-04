@@ -299,7 +299,8 @@ def _renumber(text: str, old_id: str, new_id: str) -> str:
 
 def build_contract(
     idx: int, rng: random.Random, standard: list[Clause], k: int, drop: int
-) -> tuple[str, list[EvalCase]]:
+) -> tuple[str, list[EvalCase], dict[str, str]]:
+    """(계약서 텍스트, 변형 라벨, 전체 조항 매핑 {합성 clause_id: 표준 clause_id})"""
     contract_id = f"synthetic_contract_{idx:02d}"
     # 1) 변형 선택: 조항당 최대 1개 (평가 매칭 키가 조항+카테고리라서)
     pool = MUTATIONS[:]
@@ -323,6 +324,7 @@ def build_contract(
     # 3) 재번호 + 변형 주입 + 당사자 명칭 치환
     by_clause = {m.clause_id: m for m in chosen}
     cases: list[EvalCase] = []
+    clause_map: dict[str, str] = {}
     parts = [
         f"하도급계약서 ({contract_id}, SYNTHETIC — 평가용 합성 데이터, 실제 계약 아님)",
         "본 문서는 공정거래위원회 건설업종 표준하도급계약서(2024.12.24)를 바탕으로 자동 생성되었다.",
@@ -330,6 +332,7 @@ def build_contract(
     ]
     for n, c in enumerate(kept, start=1):
         new_id = f"제{n}조"
+        clause_map[new_id] = c.clause_id
         text = _renumber(c.text, c.clause_id, new_id)
         if c.clause_id in by_clause:
             m = by_clause[c.clause_id]
@@ -351,7 +354,7 @@ def build_contract(
             text = text.replace(a, b)
         parts.append(text)
         parts.append("")
-    return "\n".join(parts), cases
+    return "\n".join(parts), cases, clause_map
 
 
 def main() -> None:
@@ -368,11 +371,11 @@ def main() -> None:
     rng = random.Random(args.seed)
     total = 0
     for i in range(1, args.n + 1):
-        text, cases = build_contract(i, rng, standard, args.k, args.drop)
+        text, cases, clause_map = build_contract(i, rng, standard, args.k, args.drop)
         (OUT_DIR / f"synthetic_contract_{i:02d}.txt").write_text(text, encoding="utf-8")
         (CASES_DIR / f"synthetic_contract_{i:02d}.yaml").write_text(
             yaml.safe_dump(
-                {"cases": [c.model_dump(mode="json") for c in cases]},
+                {"cases": [c.model_dump(mode="json") for c in cases], "clause_map": clause_map},
                 allow_unicode=True,
                 sort_keys=False,
             ),

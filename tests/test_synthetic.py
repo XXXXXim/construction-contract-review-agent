@@ -21,7 +21,7 @@ def _digest(seed: int) -> str:
     rng = random.Random(seed)
     h = hashlib.sha256()
     for i in range(1, 4):
-        text, cases = build_contract(i, rng, std, 8, 10)
+        text, cases, _ = build_contract(i, rng, std, 8, 10)
         h.update(text.encode())
         h.update(str([c.model_dump() for c in cases]).encode())
     return h.hexdigest()
