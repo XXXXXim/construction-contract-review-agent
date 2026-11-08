@@ -250,3 +250,16 @@
 **다음 할 일**
 - (선택) 캐시 끄고 v1·v2 처리 시간 측정: `LLM_CACHE=0 DATASET=v2 LLM_PROVIDER=anthropic bash scripts/run_real_eval.sh` (v1·v2 호출 비용 다시 발생)
 - 05_traceability.md (P6), 06_retro.md (P7), 자소서·면접 정리
+
+## 2026-11-08 · M7 마무리
+**한 일**
+- `docs/05_traceability.md` (P6): FR 17개·NFR 11개 → 설계 → 구현 파일 → 테스트 → 결과. 미충족 3건(FR-05 하이브리드, NFR-09 시간, NFR-10 비용)과 해결 방법
+- `docs/06_retro.md` (P7): KPT. 핵심 교훈 "측정할 준비가 끝나기 전에는 만들지 않는다"
+- `docs/07_final_report.md`: 지표 비교표(set-v2/set-v1), 가장 효과 컸던 개선(규칙 레이어), 한계 3, 자소서 3줄, 면접 질문 5
+- README 문서 안내 섹션, CLAUDE.md 폴더 구조(set-v2, 05~07) 갱신, 02 요구사항의 오래된 숫자 정정
+
+**숫자**
+- `make test`: 74 passed · `make lint`: 통과
+
+**남은 선택 과제**
+- 캐시 끄고 처리 시간 측정 (NFR-09), 토큰 단가로 비용 계산 (NFR-10), 실제 공개 계약서로 일반화 평가, 어려운 변형(문장 재작성) 추가

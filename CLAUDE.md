@@ -28,6 +28,9 @@
 ├── docs/02_requirements.md # P1 요구사항 (FR/NFR, 수용 기준, 상태)
 ├── docs/03_design.md       # P2 설계 (ADR, 아키텍처, 컴포넌트)
 ├── docs/04_readiness.md    # P3 준비물·리스크
+├── docs/05_traceability.md # P6 요구사항 추적표
+├── docs/06_retro.md        # P7 회고 (KPT)
+├── docs/07_final_report.md # 최종 보고 (지표, 자소서 3줄, 면접 질문)
 ├── docs/SPEC.md            # 입력·출력 스키마, 카테고리, 판정 기준, 비범위
 ├── docs/PLAN.md            # 마일스톤 체크리스트
 ├── src/contract_review/
@@ -39,8 +42,10 @@
 ├── app/streamlit_app.py    # UI (M6)
 ├── scripts/make_synthetic.py  # 합성 평가셋 생성 (M2, 시드 고정)
 ├── data/raw/               # 보스가 넣는 공개 원문 PDF (수정 금지)
-├── data/synthetic/         # 합성 계약서 (*synthetic*)
-├── eval/cases/*.yaml       # 정답 라벨
+├── data/synthetic/         # 합성 계약서 set-v1 (*synthetic*, 결과 재현용으로 수정 금지)
+├── data/synthetic_v2/      # 합성 계약서 set-v2 (조문 참조 재번호 수정판)
+├── eval/cases/*.yaml       # 정답 라벨 set-v1
+├── eval/cases_v2/*.yaml    # 정답 라벨 set-v2
 ├── eval/results/           # {날짜}_{config}.md 평가 결과
 └── tests/
 ```

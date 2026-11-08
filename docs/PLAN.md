@@ -46,5 +46,6 @@
 - [x] `docker build` 성공 + 컨테이너 안에서 v2 파이프라인 실행·UI 헬스체크 ok (세션 프록시 CA만 추가한 검증용 Dockerfile 사용, 커밋된 Dockerfile은 그대로)
 
 ## M7: README 케이스 스터디
-- [x] 문제 정의, 아키텍처(Mermaid), 비교표(fake), 한계, 다음 단계 (실제 LLM 숫자는 키 확보 후 교체)
-- [ ] 최종 보고 (지표표, 최대 개선, 한계 3, 자소서 3줄, 면접 질문 5)
+- [x] 문제 정의, 아키텍처(Mermaid), 비교표(실제 LLM, set-v1·set-v2), 한계, 다음 단계
+- [x] 최종 보고 `docs/07_final_report.md` (지표표, 최대 개선, 한계 3, 자소서 3줄, 면접 질문 5)
+- [x] P6 요구사항 추적표 `docs/05_traceability.md`, P7 회고 `docs/06_retro.md`

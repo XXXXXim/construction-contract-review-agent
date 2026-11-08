@@ -154,7 +154,17 @@ CLI로 리포트 1건:
 - 실제 공개 계약서 샘플(예: 공공기관 공고 첨부) 몇 건으로 합성셋 밖 성능 점검
 - 2차 사용자(중소 하도급 업체)용: "이 조항이 왜 불리한지" 쉬운 설명 모드
 
-## 7. 레포 구조
+## 7. 문서
+
+| 문서 | 내용 |
+|---|---|
+| [`docs/07_final_report.md`](docs/07_final_report.md) | **최종 보고: 지표표, 가장 효과 컸던 개선, 한계, 면접 질문** |
+| [`docs/01_brief.md`](docs/01_brief.md) ~ [`04_readiness.md`](docs/04_readiness.md) | 문제 정의 · 요구사항 · 설계(ADR) · 준비물 (사후 작성) |
+| [`docs/05_traceability.md`](docs/05_traceability.md) | 요구사항 → 설계 → 구현 → 테스트 추적표 |
+| [`docs/06_retro.md`](docs/06_retro.md) | 회고 (KPT) |
+| [`PROGRESS.md`](PROGRESS.md) | 날짜별 진행 로그 |
+
+## 8. 레포 구조
 
 ```
 src/contract_review/
