@@ -18,6 +18,7 @@
 | FR-10 | MD + JSON 리포트 | §3 report | `nodes/report.py` | `test_report_sorted_by_risk_and_has_disclaimer`, `test_e2e_v2_with_fake_llm_on_synthetic_contract` | ✅ 실측 샘플: `eval/results/sample_report/` |
 | FR-11 | provider 설정 전환 | ADR-07 | `config.py`, `llm.py` | `test_settings_default_fake`, `test_anthropic_client_does_not_set_temperature` | ✅ fake·anthropic 실행. openai 미실행 |
 | FR-12 | 시드 고정 합성 평가셋 | ADR-08 | `scripts/make_synthetic.py` | `test_generation_is_deterministic`, `test_committed_cases_match_contracts`, `test_dataset_v2_has_consistent_cross_references_and_v1_keeps_the_bug`, `test_dataset_v2_keeps_same_mutations_as_v1` | ✅ set-v1(원본, 바이트 동일 재생성), set-v2(조문 참조 수정판), 각 라벨 24개 |
+| FR-18 | 공정위 실제 문구 탐지 | §6 | `scripts/make_public_cases.py`, `data/public_cases/cases.yaml`, `eval.py` (acceptable_categories, 탐지율) | `test_public_case_quotes_exist_in_decision_pdfs`, `test_public_contracts_append_clause_to_unmodified_standard`, `test_matches_uses_acceptable_categories` | ✅ 탐지 5/5 (세 구성 동일), 오탐 0 |
 | FR-13 | baseline/v1/v2 비교 | §2 설정별 경로, §6 | `graph.py`, `eval.py`, `scripts/run_real_eval.sh` | `test_run_eval_v2_and_baseline_produce_metrics`, `test_run_eval_on_dataset_v2`, `test_save_result_does_not_overwrite_same_day_run` | ✅ `eval/results/2026-11-08_compare_anthropic.md` |
 | FR-14 | Streamlit UI | ADR-10 | `app/streamlit_app.py` | 수동: 기동·헬스체크 (11/04, 11/08 컨테이너 안) | ✅ 자동 테스트 없음 |
 | FR-15 | Docker | – | `Dockerfile` | 수동: 빌드·컨테이너 안 v2 실행·UI 헬스체크 (11/04) | ✅ 세션 프록시 CA 를 추가한 검증용 Dockerfile 기준. 프록시 없는 환경에서 원본 Dockerfile 빌드는 미확인 |

@@ -26,7 +26,7 @@
 | FR-10 | 한국어 마크다운 + JSON 리포트를 위험도순으로 만든다 | Must | 근거 인용, 면책 고지, 처리 통계 포함 | ✅ | `test_report_sorted_by_risk_and_has_disclaimer`, `test_e2e_v2_with_fake_llm_on_synthetic_contract` |
 | FR-11 | LLM provider 를 설정으로 바꾼다 (`fake`/`openai`/`anthropic`) | Must | 코드 수정 없이 환경변수로 전환 | ✅ fake, anthropic 실행 확인 (openai 미실행) | `test_settings_default_fake` |
 | FR-12 | 시드 고정 합성 평가셋을 만든다 | Must | 계약서 3개, 라벨 20개 이상, 정상 조항 포함, 재실행 시 동일 | ✅ (라벨 24개). 평가셋 set-v2(조문 참조 재번호 수정판) 추가 | `test_generation_is_deterministic`, `test_committed_cases_match_contracts`, `test_dataset_v2_has_consistent_cross_references_and_v1_keeps_the_bug` |
-| FR-18 | 공정위 의결서의 **실제 부당특약 문구**로 탐지율을 잰다 (합성셋 밖 일반화 확인) | Should | 실행 전에 허용 카테고리를 고정·커밋. 탐지율, 카테고리 일치, 표준 조항 오탐을 기록 | 🟡 평가셋 구축 (11/08), 실제 LLM 실행 전 | `test_public_case_quotes_exist_in_decision_pdfs`, `test_public_contracts_append_clause_to_unmodified_standard` |
+| FR-18 | 공정위 의결서의 **실제 부당특약 문구**로 탐지율을 잰다 (합성셋 밖 일반화 확인) | Should | 실행 전에 허용 카테고리를 고정·커밋. 탐지율, 카테고리 일치, 표준 조항 오탐을 기록 | ✅ 실측 (11/08): 세 구성 모두 탐지 5/5, 오탐 0. baseline 대비 우위 없음 | `test_public_case_quotes_exist_in_decision_pdfs`, `test_public_contracts_append_clause_to_unmodified_standard` |
 | FR-13 | baseline / v1 / v2 를 같은 평가셋에서 비교한다 | Must | Recall, Precision, Citation, hit@3, 시간, 토큰을 표로 저장 | ✅ 실제 LLM 비교표 `eval/results/2026-11-08_compare_anthropic.md` | `test_run_eval_v2_and_baseline_produce_metrics` |
 | FR-14 | PDF 업로드 → 리포트 웹 화면 | Should | `make run` 으로 실행, 리포트 다운로드 | ✅ (헬스체크 확인, 자동 테스트 없음) | 수동 확인 |
 | FR-15 | Docker 이미지로 실행한다 | Could | `docker build` 성공, 컨테이너 안에서 파이프라인 실행 | ✅ (세션 프록시 CA 추가한 검증용 Dockerfile 기준) | 수동 확인 |
