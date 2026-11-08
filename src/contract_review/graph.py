@@ -10,7 +10,9 @@ PDF → parse → split_clauses → retrieve_standard → rule_check → llm_jud
 
 from __future__ import annotations
 
+import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
@@ -111,10 +113,17 @@ class Pipeline:
     def n_judge(self, s: ReviewState) -> ReviewState:
         findings: list[Finding] = []
         st = s["stats"]
-        for c in s["clauses"]:
+        clauses = s["clauses"]
+
+        def judge(c: Clause):  # 조항마다 독립 호출이라 병렬로 돌린다 (LLM_CONCURRENCY, 기본 4)
             hits = s["rule_hits"].get(c.clause_id, [])
+            return hits, llm_judge(c, s["refs"][c.clause_id], hits, self.llm, verify=self.config.verify_evidence)
+
+        workers = max(1, int(os.getenv("LLM_CONCURRENCY", "4"))) if self.settings.llm_provider != "fake" else 1
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            results = list(ex.map(judge, clauses))  # 순서 유지 → 결과가 결정적
+        for c, (hits, res) in zip(clauses, results, strict=True):
             findings += [rule_hit_to_finding(h, c) for h in hits]
-            res = llm_judge(c, s["refs"][c.clause_id], hits, self.llm, verify=self.config.verify_evidence)
             st.llm_calls += 1
             st.input_tokens += res.input_tokens
             st.output_tokens += res.output_tokens

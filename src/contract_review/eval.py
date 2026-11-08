@@ -233,8 +233,12 @@ def compare(llm_filter: str | None = None) -> Path:
     results = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(RESULTS.glob("*.json"))]
     if llm_filter:
         results = [r for r in results if r["llm"].startswith(llm_filter)]
+    # 같은 (LLM, config) 는 가장 최근 결과 하나만 쓴다 (날짜별 결과 파일이 쌓이므로)
+    latest: dict[tuple[str, str], dict] = {}
+    for r in sorted(results, key=lambda r: r["date"]):
+        latest[(r["llm"], r["config"])] = r
     order = {"baseline": 0, "v1": 1, "v2": 2}
-    results.sort(key=lambda r: (r["llm"], order.get(r["config"], 9), r["date"]))
+    results = sorted(latest.values(), key=lambda r: (r["llm"], order.get(r["config"], 9)))
     out = RESULTS / f"{date.today().isoformat()}_compare{'_' + llm_filter if llm_filter else ''}.md"
     out.write_text(render_compare(results), encoding="utf-8")
     return out

@@ -153,3 +153,19 @@
 
 **다음 할 일**
 - R-01 API 키 확보 → 실제 LLM baseline/v1/v2 평가 → 02 상태 갱신 → 05_traceability.md(P6), 06_retro.md(P7)
+
+## 2026-11-08 · 실제 LLM 평가 준비 (Anthropic, 보스 맥에서 실행)
+**상황**
+- Anthropic 키는 클라우드 세션의 보안 입력 폼으로 저장할 수 없음 (api.anthropic.com 은 시스템 예약 호스트, 키 없이 호출하면 401 확인) → 보스 맥에서 실행하기로 결정
+
+**한 일**
+- 가짜 키로 Anthropic 경로 드라이런 → **`claude-sonnet-5-5` 가 temperature 지정을 거부하는 버그 발견** (그대로 돌렸으면 150회 호출 전부 실패). temperature 제거, timeout 600초. 회귀 테스트 `test_anthropic_client_does_not_set_temperature`
+- 조항별 LLM 호출 병렬화 (`LLM_CONCURRENCY`, 기본 4; fake 는 1). 결과 순서 유지, 카운터·캐시 쓰기 스레드 안전 처리
+- `scripts/run_real_eval.sh`: 연결 확인 1회 → baseline/v1/v2 → 비교표 → 샘플 리포트 1건 (fake 로 끝까지 실행 확인)
+- 비교표가 날짜별 중복 행을 내던 문제 수정: (LLM, config) 별 최신 결과만
+
+**숫자**
+- `make test`: 69 passed
+
+**다음 할 일**
+- 보스 맥에서 `scripts/run_real_eval.sh` 실행 → 결과 push → README·02_requirements 상태 갱신 → 05_traceability, 06_retro

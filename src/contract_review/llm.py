@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import re
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
@@ -19,6 +20,7 @@ from typing import Protocol
 from contract_review.config import Settings
 from contract_review.textnorm import canon, strip_header
 
+_LOCK = threading.Lock()
 DEFAULT_MODELS = {"openai": "gpt-4o-mini", "anthropic": "claude-sonnet-5-5"}
 MAX_RETRIES = int(os.getenv("LLM_MAX_RETRIES", "5"))
 # baseline 은 계약서 전체에 대한 지적을 한 번에 출력하므로 넉넉히 (잘리면 _parse 가 부분 복구)
@@ -34,7 +36,10 @@ class JudgeLLM(Protocol):
 
 @dataclass
 class LangChainLLM:
-    """langchain 채팅 모델 래퍼. 429/5xx 재시도는 모델의 max_retries(지수 백오프)가 맡는다."""
+    """langchain 채팅 모델 래퍼. 429/5xx 재시도는 모델의 max_retries(지수 백오프)가 맡는다.
+
+    graph.n_judge 가 여러 스레드에서 동시에 부르므로 카운터는 락으로 보호한다.
+    """
 
     name: str
     model: object  # BaseChatModel
@@ -44,7 +49,8 @@ class LangChainLLM:
         msg = self.model.invoke(prompt)  # type: ignore[attr-defined]
         meta = getattr(msg, "response_metadata", None) or {}
         if meta.get("stop_reason") == "max_tokens" or meta.get("finish_reason") == "length":
-            self.truncated_calls += 1
+            with _LOCK:
+                self.truncated_calls += 1
         usage = getattr(msg, "usage_metadata", None) or {}
         content = msg.content
         if isinstance(content, list):  # anthropic 블록 형식
@@ -77,14 +83,17 @@ class CachedLLM:
         path = self.cache_dir / f"{key}.json"
         if path.exists():
             d = json.loads(path.read_text(encoding="utf-8"))
-            self.hits += 1
+            with _LOCK:
+                self.hits += 1
             return d["text"], d["input_tokens"], d["output_tokens"]
         text, tin, tout = self.inner.complete(prompt)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        path.write_text(
+        tmp = path.with_suffix(f".{threading.get_ident()}.tmp")  # 동시 쓰기 대비: 임시 파일 후 교체
+        tmp.write_text(
             json.dumps({"text": text, "input_tokens": tin, "output_tokens": tout}, ensure_ascii=False),
             encoding="utf-8",
         )
+        tmp.replace(path)
         return text, tin, tout
 
 
@@ -171,7 +180,12 @@ def _make_llm(settings: Settings) -> JudgeLLM:
         return LangChainLLM(
             name=f"anthropic:{model}",
             model=ChatAnthropic(
-                model=model, temperature=0, max_tokens=MAX_OUTPUT_TOKENS, max_retries=MAX_RETRIES, timeout=120
+                # claude-sonnet-5-5 는 temperature 를 기본값 외로 지정하면 거부한다 (11/08 드라이런에서 확인).
+                # baseline 은 출력이 길어서 timeout 을 넉넉히 둔다.
+                model=model,
+                max_tokens=MAX_OUTPUT_TOKENS,
+                max_retries=MAX_RETRIES,
+                timeout=600,
             ),
         )
     raise ValueError(f"알 수 없는 LLM_PROVIDER: {p}")

@@ -167,3 +167,16 @@ def test_dedupe_prefers_rule_then_higher_risk() -> None:
         [_f("llm", RiskLevel.LOW), _f("llm", RiskLevel.HIGH), _f("llm", RiskLevel.LOW, Category.OTHER)]
     )
     assert len(out) == 2 and {f.risk_level for f in out} == {RiskLevel.HIGH, RiskLevel.LOW}
+
+
+# ── 11/08 드라이런: claude-sonnet-5-5 는 temperature 지정 시 호출 자체를 거부 ──
+def test_anthropic_client_does_not_set_temperature(monkeypatch) -> None:
+    """FR-11. 네트워크 호출 없이 클라이언트 설정만 확인한다."""
+    from contract_review.config import Settings
+    from contract_review.llm import get_llm
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-dummy")
+    monkeypatch.delenv("LLM_CACHE", raising=False)
+    llm = get_llm(Settings(llm_provider="anthropic"))
+    assert llm.model.temperature is None
+    assert llm.model.max_tokens >= 16000
