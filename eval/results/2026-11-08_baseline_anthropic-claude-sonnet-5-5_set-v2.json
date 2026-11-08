@@ -1,0 +1,369 @@
+{
+  "date": "2026-11-08",
+  "config": "baseline",
+  "llm": "anthropic:claude-sonnet-5-5",
+  "retrieval": "bm25",
+  "contracts": 3,
+  "labels": 24,
+  "findings": 27,
+  "recall": 0.9167,
+  "precision": 0.8148,
+  "citation_accuracy": 0.0,
+  "risk_match": 0.7273,
+  "retrieval_hit3": null,
+  "avg_sec_per_contract": 47.79,
+  "avg_input_tokens": 43560,
+  "avg_output_tokens": 7368,
+  "avg_llm_calls": 1.0,
+  "dropped_findings": 0,
+  "llm_errors": 0,
+  "unparsed_responses": 0,
+  "avg_cost_usd": null,
+  "per_contract": {
+    "synthetic_contract_01": {
+      "labels": 8,
+      "findings": 8,
+      "tp": 7,
+      "tp_findings": 7,
+      "cite_ok": 0,
+      "risk_ok": 5,
+      "hit3": null,
+      "elapsed_sec": 45.3,
+      "input_tokens": 43478,
+      "output_tokens": 7045,
+      "llm_calls": 1,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [
+        "제50조/termination (term_40_to_70)"
+      ],
+      "false_positives": [
+        "제18조/unfair_special_terms"
+      ],
+      "findings_detail": [
+        {
+          "clause_id": "제34조",
+          "category": "payment_deadline",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제34조 제3항; 하도급법 제13조 제4항(발주자로부터 받은 현금비율 미만으로 지급 금지)",
+          "deviation_summary": "원사업자가 발주자에게서 받은 현금비율과 관계없이 하도급대금 전액을 어음으로 줄 수 있게 했습니다. 표준계약서는 발주자로부터 받은 현금비율 미만으로 지급하지 못하게 합니다. 수급사업자의 현금 유동성이 심각하게 악화될 수 있습니다.",
+          "evidence_quote": "갑가 을에게 하도급대금을 지급할 때에는 갑가 발주자로부터 해당 공사와 관련하여 받은 현금비율과 관계없이 전액 어음으로 지급할 수 있다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제41조",
+          "category": "unfair_special_terms",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제41조 제2항 제2호; 하도급법 제3조의4(부당한 특약 금지)",
+          "deviation_summary": "표준계약서에서는 무효로 보는 '민원처리·산업재해 등 비용을 수급사업자에게 부담시키는 약정'을 무효 목록에 넣지 않고, 오히려 수급사업자가 전액 부담한다고 규정했습니다. 부당특약 무효 조항의 취지를 뒤집어 비용을 전가하는 내용입니다. 제30조 제2항 제8호, 제41조 제4항 제4호와도 충돌합니다.",
+          "evidence_quote": "2. 민원처리, 산업재해 등과 관련된 비용은 을가 전액 부담한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제48조",
+          "category": "delay_penalty",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제48조 제3항(불가항력, 원재료 공급지연, 갑의 귀책 등은 지체일수에 산입하지 않음); 하도급법 제2조·제8조",
+          "deviation_summary": "지체 사유를 불문하고 모든 지체일수를 산입하도록 해서, 불가항력이나 원사업자의 귀책으로 인한 지연에도 지체상금이 부과됩니다. 표준계약서는 이 사유들을 지체일수에서 제외합니다. 제12조 제4항, 제16조 제8항 등 다른 조항과도 모순됩니다.",
+          "evidence_quote": "지체의 사유를 불문하고 모든 지체일수를 제1항의 지체일수에 산입한다. 다음 각 호의 경우에도 같다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제45조",
+          "category": "payment_deadline",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제45조 제1항; 하도급법 제13조의2(계약체결일부터 30일 이내 대금지급보증)",
+          "deviation_summary": "원사업자의 대금지급보증 기한을 계약체결일부터 90일로 늘렸습니다. 표준계약서와 하도급법은 30일 이내로 정하고 있으며, 같은 조 제3항(30일)과도 일관되지 않습니다. 그동안 수급사업자는 대금 미지급 위험에 보증 없이 노출됩니다.",
+          "evidence_quote": "갑는 계약체결일부터 90일 이내에 을에게 다음 각 호의 구분에 따라 이 계약에서 정한 계약금액의 지급을 보증",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제46조",
+          "category": "damages_cap",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제46조 제4항; 하도급법 제35조 제2항(부당감액·위탁취소·반품·부당대금결정·보복조치 등은 손해의 3배 이내 배상)",
+          "deviation_summary": "원사업자가 부당감액, 부당반품, 부당 대금결정, 보복조치 등을 위반한 경우에도 수급사업자는 실제 손해액 범위에서만 배상받을 수 있습니다. 표준계약서와 법은 손해의 3배 이내 징벌적 배상을 인정합니다. 원사업자 위반에 대한 억지력이 약해집니다.",
+          "evidence_quote": "을는 이로 인해 발생한 실제 발생한 손해액을 넘지 아니하는 범위에서 배상을 청구할 수 있다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제31조",
+          "category": "design_change",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제31조 제3항; 하도급법 제16조 제1항(증액받은 날부터 30일 이내 하도급대금 조정)",
+          "deviation_summary": "발주자로부터 계약금액을 증액받은 뒤 하도급대금을 조정하는 기한을 90일로 늘렸습니다. 표준계약서는 30일 이내입니다. 같은 조 제7항의 지급기한(15일)과도 맞지 않고, 설계변경 증액분의 지급이 늦어질 수 있습니다.",
+          "evidence_quote": "제1항에 따른 하도급대금의 증액 또는 감액은 갑가 발주자로부터 계약금액을 증액 또는 감액받은 날부터 90일 이내에 한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제49조",
+          "category": "defect_liability",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제49조 제8항(하자보수보증금 반환기한 10일 이내)",
+          "deviation_summary": "하자보수 의무기간이 끝난 뒤 하자보수보증금 반환기한을 청구일부터 90일로 길게 잡았습니다. 같은 조 제9항 장기계속공사의 반환기한(10일)과도 맞지 않습니다. 수급사업자의 자금이 장기간 묶입니다.",
+          "evidence_quote": "갑는 하자보수 의무기간이 종료한 후 을의 청구가 있는 날부터 90일 이내에 을에게 제1항의 하자보수보증금을 반환한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제18조",
+          "category": "unfair_special_terms",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제18조 제2항; 산업안전보건법상 작업중지 조치(제16조 제8항과의 균형)",
+          "deviation_summary": "수급사업자가 급박한 위험이나 중대재해로 법령에 따라 작업을 중지해 공사가 지체되면 원사업자가 손해배상을 청구할 수 있게 했습니다. 수급사업자는 무과실을 스스로 증명해야 면책됩니다. 안전조치를 이행한 데 대한 책임을 수급사업자에게 전가하는 구조입니다.",
+          "evidence_quote": "갑는 을에게 이로 인해 발생한 손해에 대한 배상을 청구할 수 있다. 다만, 을가 고의 또는 과실없을 증명한 경우에는 그러하지 아니하다.",
+          "label": "FP"
+        }
+      ]
+    },
+    "synthetic_contract_02": {
+      "labels": 8,
+      "findings": 9,
+      "tp": 8,
+      "tp_findings": 8,
+      "cite_ok": 0,
+      "risk_ok": 6,
+      "hit3": null,
+      "elapsed_sec": 42.76,
+      "input_tokens": 43456,
+      "output_tokens": 6383,
+      "llm_calls": 1,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [],
+      "false_positives": [
+        "제16조/damages_cap"
+      ],
+      "findings_detail": [
+        {
+          "clause_id": "제18조",
+          "category": "unfair_special_terms",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제18조(산업안전보건관리비), 하도급법 제4조(부당한 하도급대금 결정 금지), 표준하도급계약서 제29조 제2항 제8호(산업안전보건관리비 전가는 부당 감액)",
+          "deviation_summary": "표준계약서에는 없는 문장을 제목 바로 아래에 넣어 산업안전보건관리비를 을이 전액 부담하게 하고 갑은 계상조차 하지 않는다고 정했다. 같은 조 제1~4항의 갑의 책정·지급·정산 의무와 정면으로 충돌하며, 법령상 갑이 부담할 비용을 을에게 전가하는 부당특약에 해당한다.",
+          "evidence_quote": "산업안전보건관리비는 을가 전액 부담하며 갑는 이를 계상하지 아니한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제40조",
+          "category": "unfair_special_terms",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제40조 제2항(부당특약 무효 사유), 하도급법 제3조의4(부당한 특약 금지)",
+          "deviation_summary": "표준계약서는 민원처리·산업재해 비용을 을에게 부담시키는 약정을 무효로 정한다. 그런데 이 조항은 '무효 약정' 목록 안에서 이 비용을 을이 전액 부담한다고 규정해 취지를 뒤집었다. 을에게 비용을 전가하는 부당특약이며 제19조 제5항, 제29조 제2항 제8호와도 모순된다.",
+          "evidence_quote": "민원처리, 산업재해 등과 관련된 비용은 을가 전액 부담한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제46조",
+          "category": "damages_cap",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제46조 제1항(쌍방 손해배상 책임), 민법 제390조·제393조, 하도급법 제35조(손해배상책임)",
+          "deviation_summary": "갑의 배상책임만 '어떠한 경우에도' 하도급대금의 5%로 제한했다. 을의 책임에는 상한이 없어 일방적으로 불리하다. 같은 조 제4·5항의 3배·5배 징벌적 배상과 하도급법상 갑의 책임을 사실상 무력화할 수 있다.",
+          "evidence_quote": "다만, 갑의 배상책임은 어떠한 경우에도 하도급대금의 100분의 5를 초과하지 아니한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제33조",
+          "category": "payment_deadline",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제33조 제2항(발주자로부터 대금을 받은 날부터 15일 이내 지급), 하도급법 제13조 제6항",
+          "deviation_summary": "갑이 발주자로부터 준공금·기성금을 받은 뒤 을에게 지급하는 기한이 법정 기준인 15일 이내에서 45일 이내로 늘어났다. 을의 자금 부담이 커지고 법정 기한을 위반한 약정이다.",
+          "evidence_quote": "발주자로부터 그 준공금이나 기성금 등을 지급받은 날부터 45일 이내에 을에게 지급한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제30조",
+          "category": "design_change",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제30조 제7항(발주자로부터 증액대금을 받은 날부터 15일 이내 지급), 하도급법 제16조 제3항",
+          "deviation_summary": "설계변경 등으로 발주자에게서 증액받은 대금을 을에게 지급하는 기한이 15일에서 60일로 늘어났다. 같은 조 제8항의 '15일' 기준과도 내부적으로 충돌한다. 갑이 증액 대금을 오래 보유할 수 있어 을에게 불리하다.",
+          "evidence_quote": "갑는 발주자로부터 증액받은 대금을 수령한 경우 수령한 날부터 60일 이내에 을에게 증액한 하도급대금을 지급한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제45조",
+          "category": "payment_deadline",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제45조 제1항(계약체결일부터 30일 이내 대금지급보증), 하도급법 제13조의2",
+          "deviation_summary": "갑의 대금지급보증 기한이 계약체결일부터 30일에서 90일로 늘어났다. 같은 조 제3항(장기계속계약)의 30일과도 불일치한다. 그동안 을은 대금 미지급 위험에 보증 없이 노출되고, 을의 계약이행보증은 먼저 제공되는 구조가 될 수 있다.",
+          "evidence_quote": "갑는 계약체결일부터 90일 이내에 을에게 다음 각 호의 구분에 따라 이 계약에서 정한 계약금액의 지급을 보증",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제48조",
+          "category": "delay_penalty",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제48조(지체상금), 하도급법 제4조·제3조의4(부당한 감액·특약 금지), 민법 제398조(손해배상액의 예정)",
+          "deviation_summary": "갑이 을의 동의 없이 임의로 지체상금을 하도급대금이나 예치금에서 공제할 수 있게 했다. 을은 지체 사유나 금액을 다툴 기회가 없고, 갑의 책임 사유가 있어도 공제될 위험이 있다. 일방적 상계·공제 권한이라 부당 감액으로 이어질 수 있다.",
+          "evidence_quote": "갑는 제1항의 지체상금을 을에게 지급하여야 할 하도급대금 또는 그 밖의 예치금에서 을의 동의 없이 임의로 공제할 수 있다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제50조",
+          "category": "termination",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제50조 제5항(상대방에 대한 쌍방 손해배상 청구), 민법 제551조",
+          "deviation_summary": "해제·해지로 인한 손해배상 청구권을 갑에게만 인정했다. 갑의 귀책으로 해제·해지되는 경우(제50조 제2항 제2호, 제6호, 제8호 등)에도 을은 손해배상을 청구할 근거가 없다. 입증책임도 상대방(을)에게 돌아간다.",
+          "evidence_quote": "갑는 을에 대하여 해제 또는 해지로 인해 발생한 손해배상을 청구할 수 있다. 다만, 상대방이 고의 또는 과실 없음을 증명한 경우에는 그러하지 아니하다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제16조",
+          "category": "damages_cap",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제16조(작업중지 등), 산업안전보건법상 작업중지 의무, 민법 제390조(과실책임 원칙)",
+          "deviation_summary": "을이 법령상 의무로 안전조치·작업중지를 한 경우에도 공사가 지체되면 갑이 손해배상을 청구할 수 있게 했다. 을이 무과실을 증명해야 면책되는 입증책임 전환이다. 안전조치로 인한 지연의 위험을 을에게 전가하며 제48조 제3항의 지체일수 제외 취지와도 어긋난다.",
+          "evidence_quote": "갑는 을에게 이로 인해 발생한 손해에 대한 배상을 청구할 수 있다. 다만, 을가 고의 또는 과실없음을 증명한 경우에는 그러하지 아니하다.",
+          "label": "FP"
+        }
+      ]
+    },
+    "synthetic_contract_03": {
+      "labels": 8,
+      "findings": 10,
+      "tp": 7,
+      "tp_findings": 7,
+      "cite_ok": 0,
+      "risk_ok": 5,
+      "hit3": null,
+      "elapsed_sec": 55.3,
+      "input_tokens": 43746,
+      "output_tokens": 8678,
+      "llm_calls": 1,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [
+        "제29조/design_change (dc_pay_15_to_60)"
+      ],
+      "false_positives": [
+        "제29조/payment_deadline",
+        "제16조/damages_cap",
+        "제51조/defect_liability"
+      ],
+      "findings_detail": [
+        {
+          "clause_id": "제34조",
+          "category": "payment_deadline",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "하도급법 제13조 제1항(목적물 수령일부터 60일 이내 지급), 표준하도급계약서 제34조 제1항",
+          "deviation_summary": "하도급대금 지급기일의 상한을 목적물 인수일부터 90일로 정했습니다. 법정·표준 기한인 60일보다 30일 길어 수급사업자에게 불리합니다. 같은 조 제5·6항, 제28조 제5항 등의 '60일' 기준과도 충돌합니다.",
+          "evidence_quote": "다만, 하도급대금의 지급기일은 목적물 인수일부터 90일을 초과하지 아니한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제29조",
+          "category": "payment_deadline",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "하도급법 제13조 제6항(발주자로부터 증액 대금을 받은 날부터 15일 이내 지급), 표준하도급계약서 제29조 제8항",
+          "deviation_summary": "발주자로부터 증액된 대금을 받은 뒤 60일 이내에 하도급대금을 지급하도록 했습니다. 같은 조 제8항의 15일 기준 및 법정 기한과 충돌하며, 증액분 지급이 부당하게 늦어질 수 있습니다.",
+          "evidence_quote": "갑는 발주자로부터 증액받은 대금을 수령한 경우 수령한 날부터 60일 이내에 을에게 증액한 하도급대금을 지급한다.",
+          "label": "FP"
+        },
+        {
+          "clause_id": "제46조",
+          "category": "payment_deadline",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "하도급법 제13조의2(계약체결일부터 30일 이내 대금지급보증), 표준하도급계약서 제46조 제1항",
+          "deviation_summary": "원사업자의 대금지급보증 기한을 계약체결일부터 90일로 늘렸습니다. 같은 조 제3항의 30일 및 법정·표준 기한(30일)보다 길어, 그동안 수급사업자는 대금 미지급 위험에 보증 없이 노출됩니다.",
+          "evidence_quote": "갑는 계약체결일부터 90일 이내에 을에게 다음 각 호의 구분에 따라 이 계약에서 정한 계약금액의 지급을 보증",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제49조",
+          "category": "delay_penalty",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제49조(지체상금), 민법 제398조·약관규제법 제6조(일방적 공제·상계의 제한)",
+          "deviation_summary": "원사업자가 수급사업자의 동의 없이 지체상금을 하도급대금이나 예치금에서 임의로 공제할 수 있게 했습니다. 지체 여부와 금액에 다툼이 있어도 일방적으로 공제할 수 있고, 하도급법상 부당감액 문제로 이어질 수 있습니다.",
+          "evidence_quote": "갑는 제1항의 지체상금을 을에게 지급하여야 할 하도급대금 또는 그 밖의 예치금에서 을의 동의 없이 임의로 공제할 수 있다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제50조",
+          "category": "defect_liability",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제50조 제4항(발주자·원사업자 제공 원재료, 지시, 내구연한 초과 사용 등으로 인한 하자는 수급사업자 책임에서 제외), 하도급법 제3조 제2항 및 제40조 제2항 제4호 라목",
+          "deviation_summary": "표준계약서는 발주자·원사업자의 원재료 불량, 지시 시공, 내구연한 초과 사용으로 생긴 하자를 수급사업자의 보수 대상에서 제외합니다. 이 조항은 반대로 이를 하자에 '포함'하고 원인을 불문하고 모든 하자를 보수하게 하여, 수급사업자의 책임 없는 하자까지 떠안깁니다.",
+          "evidence_quote": "제3항의 하자에는 다음 각 호의 사유로 발생한 하자를 포함하며, 을는 원인을 불문하고 모든 하자를 보수한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제47조",
+          "category": "damages_cap",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "민법 제390조(과실책임 원칙), 표준하도급계약서 제47조 제1항(고의·과실 없음을 증명하면 면책)",
+          "deviation_summary": "수급사업자가 이행을 위해 사용한 제3자의 행위로 원사업자에게 생긴 손해를, 수급사업자의 고의·과실 유무와 상관없이 연대하여 배상하도록 했습니다. 제1항의 과실책임 원칙과 달리 무과실 책임을 부과하고 배상 상한도 없습니다.",
+          "evidence_quote": "을는 이 계약에 따른 의무를 이행하기 위해 제3자를 사용한 경우 그 제3자의 행위로 인하여 갑에게 발생한 손해에 대해 제3자와 연대하여 고의·과실 유무를 불문하고 책임을 진다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제40조",
+          "category": "unfair_special_terms",
+          "risk_level": "high",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제40조 제2항 제2호(민원처리·산업재해 비용을 수급사업자에게 부담시키는 약정은 무효), 하도급법 제3조의4",
+          "deviation_summary": "부당특약으로 무효 처리되어야 할 '민원처리·산업재해 비용의 수급사업자 부담'을, 무효 사유가 아니라 수급사업자가 전액 부담한다는 확정 문구로 적었습니다. 제18조 제5항, 제28조 제2항 제8호와도 모순되며 비용을 전가할 근거로 쓰일 수 있습니다.",
+          "evidence_quote": "민원처리, 산업재해 등과 관련된 비용은 을가 전액 부담한다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제51조",
+          "category": "termination",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제51조 제1항(갑 또는 을 모두 해제·해지 가능)",
+          "deviation_summary": "당사자 중 원사업자만 해제·해지권을 가진다고 적어 수급사업자의 해제·해지권이 빠졌습니다. 표준계약서는 갑·을 쌍방에 부여합니다. 상대방의 지급정지·부도 등 사유가 생겨도 수급사업자는 제1항으로 계약에서 벗어날 수 없습니다.",
+          "evidence_quote": "갑는 다음 각 호의 어느 하나에 해당하는 경우에는 서면으로 이 계약의 전부 또는 일부를 해제 또는 해지할 수 있다.",
+          "label": "TP"
+        },
+        {
+          "clause_id": "제16조",
+          "category": "damages_cap",
+          "risk_level": "medium",
+          "source": "llm",
+          "standard_ref": "산업안전보건법상 작업중지·대피 의무, 표준하도급계약서 제16조 제2항(표준 문언과 다를 수 있어 확인 필요)",
+          "deviation_summary": "수급사업자가 법령에 따라 작업을 중지하거나 중대재해 조치를 한 경우에도, 그로 인한 공사 지체의 손해를 원사업자가 청구할 수 있게 했습니다. 수급사업자가 무과실을 증명해야 면책되어 법적 안전조치의 부담까지 수급사업자에게 전가됩니다.",
+          "evidence_quote": "갑는 을에게 이로 인해 발생한 손해에 대한 배상을 청구할 수 있다.",
+          "label": "FP"
+        },
+        {
+          "clause_id": "제51조",
+          "category": "defect_liability",
+          "risk_level": "low",
+          "source": "llm",
+          "standard_ref": "표준하도급계약서 제51조 제6항(하자보수보증금 조항 인용)",
+          "deviation_summary": "계약 해제·해지 시 하자보수보증금 납부 의무를 제49조(지체상금)에 따르도록 잘못 인용했습니다. 하자담보는 제50조에서 규율하므로 납부 시기와 금액이 불명확해지고 해석 분쟁이 생길 수 있습니다.",
+          "evidence_quote": "동시에 을는 하자보수보증금을 제49조 제1항 또는 제2항의 규정에 따라 갑에게 납부한다.",
+          "label": "FP"
+        }
+      ]
+    }
+  },
+  "dataset": "set-v2",
+  "truncated_calls": 0,
+  "cache_hits": 0
+}

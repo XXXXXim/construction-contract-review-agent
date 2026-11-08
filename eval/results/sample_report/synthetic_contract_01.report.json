@@ -1,6 +1,6 @@
 {
   "contract_id": "synthetic_contract_01",
-  "generated_at": "2026-11-08T19:24:33.912198",
+  "generated_at": "2026-11-08T19:41:48.857698",
   "config": "v2",
   "findings": [
     {
@@ -96,7 +96,7 @@
   ],
   "stats": {
     "clause_count": 50,
-    "elapsed_sec": 0.36,
+    "elapsed_sec": 0.34,
     "input_tokens": 255175,
     "output_tokens": 12003,
     "llm_calls": 50,
