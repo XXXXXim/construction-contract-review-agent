@@ -52,3 +52,14 @@ def test_results_keep_findings_detail_for_error_analysis() -> None:
 def test_run_eval_on_dataset_v2() -> None:
     r = ev.run_eval("v2", "fake", dataset="v2")
     assert r["dataset"] == "set-v2" and r["labels"] == 24
+
+
+def test_save_result_does_not_overwrite_same_day_run(tmp_path, monkeypatch) -> None:
+    """FR-13. 같은 날 같은 설정을 다시 돌려도 앞 결과 파일이 남아야 한다."""
+    monkeypatch.setattr(ev, "RESULTS", tmp_path)
+    r = ev.run_eval("v1", "fake")
+    a = ev.save_result(r)
+    r2 = {**r, "run_at": r["run_at"][:11] + "23:59:59"}
+    b = ev.save_result(r2)
+    assert a != b and a.exists() and b.exists()
+    assert r["timing_valid"] is True  # fake 는 캐시를 쓰지 않는다

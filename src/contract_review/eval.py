@@ -17,7 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import yaml
@@ -180,7 +180,8 @@ def render_result(r: dict) -> str:
         f"| Citation accuracy | {_fmt(r['citation_accuracy'])} |",
         f"| Retrieval hit@3 | {_fmt(r['retrieval_hit3'])} |",
         f"| Risk match (보조) | {_fmt(r['risk_match'])} |",
-        f"| 계약서당 처리 시간(초) | {_fmt(r['avg_sec_per_contract'])} |",
+        f"| 계약서당 처리 시간(초) | {_fmt(r['avg_sec_per_contract'])}"
+        f"{'' if r.get('timing_valid', True) else ' (캐시 적중 포함, 비교 무효)'} |",
         f"| 계약서당 토큰 (입력/출력) | {r['avg_input_tokens']:,} / {r['avg_output_tokens']:,} |",
         f"| 계약서당 LLM 호출 | {_fmt(r['avg_llm_calls'])} |",
         f"| 근거 검증으로 제외된 finding | {r['dropped_findings']} |",
@@ -213,8 +214,11 @@ def run_eval(config: str, llm_provider: str | None = None, dataset: str = "v1") 
         per[cid] = score(out["report"], cases, out.get("refs") if pipe.config.split else None)
     r = aggregate(per, config, pipe.llm.name, pipe.index.mode)
     r["dataset"] = f"set-{dataset}"
+    r["run_at"] = datetime.now().isoformat(timespec="seconds")
     r["truncated_calls"] = getattr(pipe.llm, "truncated_calls", 0)
     r["cache_hits"] = getattr(pipe.llm, "hits", 0)
+    # 캐시 적중이 있으면 처리 시간은 실제 호출 시간이 아니다 → 비교표에서 무효 표시
+    r["timing_valid"] = r["cache_hits"] == 0
     if r["llm_errors"] or r["unparsed_responses"] or r["truncated_calls"]:
         print(
             f"⚠️ LLM 실패 {r['llm_errors']} · 파싱 실패 {r['unparsed_responses']} · 잘림 {r['truncated_calls']}"
@@ -228,10 +232,19 @@ def save_result(r: dict) -> Path:
     stem = f"{r['date']}_{r['config']}_{r['llm'].replace(':', '-').replace('/', '-')}"
     if r.get("dataset", "set-v1") != "set-v1":  # set-v1 은 기존 파일명 유지
         stem += f"_{r['dataset']}"
+    # 같은 날 재실행이 앞 결과를 덮어쓰지 않게 (11/08: set-v1 재실행이 첫 실행의 처리 시간을 덮어씀)
+    if (RESULTS / f"{stem}.json").exists():
+        stem += "_" + r["run_at"][11:19].replace(":", "")
     (RESULTS / f"{stem}.json").write_text(json.dumps(r, ensure_ascii=False, indent=2), encoding="utf-8")
     md = RESULTS / f"{stem}.md"
     md.write_text(render_result(r), encoding="utf-8")
     return md
+
+
+def _cell(r: dict, col: str) -> str:
+    if col == "avg_sec_per_contract" and not r.get("timing_valid", r.get("cache_hits", 0) == 0):
+        return f"{_fmt(r.get(col))}*"
+    return _fmt(r.get(col))
 
 
 def render_compare(results: list[dict]) -> str:
@@ -249,12 +262,11 @@ def render_compare(results: list[dict]) -> str:
     head = "| 평가셋 | config | LLM | " + " | ".join(cols) + " |"
     sep = "|---|---|---|" + "---|" * len(cols)
     rows = [
-        f"| {r.get('dataset', 'set-v1')} | {r['config']} | {r['llm']} | "
-        + " | ".join(_fmt(r.get(c)) for c in cols)
-        + " |"
+        f"| {r.get('dataset', 'set-v1')} | {r['config']} | {r['llm']} | " + " | ".join(_cell(r, c) for c in cols) + " |"
         for r in results
     ]
-    return "\n".join([f"# baseline / v1 / v2 비교 ({date.today().isoformat()})", "", head, sep, *rows]) + "\n"
+    note = "\n\n\\* 캐시 적중이 있어 처리 시간이 실제 호출 시간이 아님 (비교 무효)\n"
+    return "\n".join([f"# baseline / v1 / v2 비교 ({date.today().isoformat()})", "", head, sep, *rows]) + note
 
 
 def compare(llm_filter: str | None = None) -> Path:
@@ -263,7 +275,7 @@ def compare(llm_filter: str | None = None) -> Path:
         results = [r for r in results if r["llm"].startswith(llm_filter)]
     # 같은 (LLM, config) 는 가장 최근 결과 하나만 쓴다 (날짜별 결과 파일이 쌓이므로)
     latest: dict[tuple[str, str, str], dict] = {}
-    for r in sorted(results, key=lambda r: r["date"]):
+    for r in sorted(results, key=lambda r: (r["date"], r.get("run_at", ""))):
         latest[(r["llm"], r.get("dataset", "set-v1"), r["config"])] = r
     order = {"baseline": 0, "v1": 1, "v2": 2}
     results = sorted(latest.values(), key=lambda r: (r["llm"], r.get("dataset", "set-v1"), order.get(r["config"], 9)))
