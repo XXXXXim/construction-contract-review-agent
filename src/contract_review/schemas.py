@@ -115,4 +115,10 @@ class EvalCase(BaseModel):
     injected_change: str
     mutation_id: str = ""
     standard_doc: str = "ftc_standard_subcontract"  # 정답 표준 문서
-    standard_clause_id: str = ""  # 정답 표준 조항 (citation accuracy, hit@3 에 사용)
+    standard_clause_id: str = ""  # 정답 표준 조항 (citation accuracy, hit@3 에 사용). 빈 값이면 두 지표에서 제외
+    # set-public: 실질상 함께 맞다고 볼 카테고리 (실행 전 고정). 합성셋은 비어 있어 기존과 동일하게 채점된다
+    acceptable_categories: list[Category] = []
+    source: str = ""  # 실제 문구의 출처 (의결번호, 쪽)
+
+    def matches(self, clause_id: str, category: Category) -> bool:
+        return clause_id == self.clause_id and (category == self.category or category in self.acceptable_categories)

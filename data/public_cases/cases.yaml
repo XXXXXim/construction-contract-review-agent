@@ -1,0 +1,88 @@
+# 공개 사례 평가셋 (set-public): 공정위 의결서에 인용된 **실제 계약 문구**
+# - 문구는 의결서 원문 그대로다. 다듬거나 지어내지 않는다 (CLAUDE.md 규칙 2-b).
+# - transcribed_from_image: 의결서 안에 이미지로만 들어 있어 사람이 화면을 보고 옮긴 문구 (텍스트층 검증 불가).
+#   대신 같은 의결서 본문(텍스트층)에 있는 핵심 구절(text_layer_anchor)이 실제로 있는지 테스트로 확인한다.
+# - acceptable_categories: **실제 LLM 실행 전에 고정**(2026-11-08). 결과를 보고 바꾸지 않는다.
+#   공정위 판단 근거는 모두 하도급법 제3조의4(부당한 특약의 금지)이므로 대표 category 는 unfair_special_terms 로 두고,
+#   실질 내용상 함께 맞다고 볼 수 있는 카테고리를 허용 목록에 넣는다 (이유는 rationale).
+# - expected_risk: 공정위가 법 위반으로 판단 → SPEC 6절 기준 high.
+
+cases:
+  - id: pc01_yugang_retention
+    decision: 공정거래위원회 제2소회의 의결(약) 제2025-080호 (2025. 7. 3.), 사건번호 2024광사2560
+    respondent: 유강종합건설㈜
+    pdf: data/raw/public_cases/ftc_decision_2025-080_yugang.pdf
+    location: 의결서 4쪽 <표 4> 피심인이 설정한 계약조건 (하도급계약서 6. 나. (3))
+    transcribed_from_image: false
+    clause_text: |-
+      6. 대금의 지급
+      나. 기성금
+      (3) 지급방법 : 현금 100% / 청구금액의 85% 집행(15%유보)
+      준공 후 2개월내 15% 유보금 집행
+    ftc_judgment: 하도급대금 지급시기를 준공 이후 2개월 이내로 유예하는 계약조건 → 법 제3조의4 제1항 위반 (시정명령)
+    category: unfair_special_terms
+    acceptable_categories: [unfair_special_terms, payment_deadline]
+    rationale: 법적 근거는 부당특약이지만 실질은 기성금 지급 유예(대금 지급 기한)
+    expected_risk: high
+
+  - id: pc02_jiwon_no_settlement
+    decision: 공정거래위원회 제2소회의 의결 제2025-143호 (2025. 7. 3.), 사건번호 2023부사2733
+    respondent: 지원건설㈜
+    pdf: data/raw/public_cases/ftc_decision_2025-143_jiwon.pdf
+    location: 의결서 7쪽 <표 7> 특기 시방서 중 발췌 (특기시방서 12조)
+    transcribed_from_image: false
+    clause_text: |-
+      H-PILE손료 및 모든 강자재의 손료에 대한 정산은 없다
+    ftc_judgment: 귀책사유와 관계없이 모든 손료 부담을 수급사업자에게 지움 → 법 제3조의4 제1항 및 제2항 위반 (경고)
+    category: unfair_special_terms
+    acceptable_categories: [unfair_special_terms, design_change]
+    rationale: 비용 전가(부당특약)이자, 설계변경·추가비용에 따른 대금 조정(정산) 배제
+    expected_risk: high
+
+  - id: pc03_daebang_defect_retention_contract
+    decision: 공정거래위원회 제3소회의 의결 제2026-085호 (2026. 5. 4.), 사건번호 2024하조0906
+    respondent: 대방건설㈜
+    pdf: data/raw/public_cases/ftc_decision_2026-085_daebang.pdf
+    location: 의결서 4쪽 <표 2> 건설공사 하도급계약서 내용 발췌 (13. 기타사항 가.)
+    transcribed_from_image: true
+    text_layer_anchor: 잔여 기성금 또는 정산금 중 최종 총 계약금액의 10%에 해당하는 금원의 지급을 거절하거나 보류할 수 있다
+    clause_text: |-
+      13. 기타사항
+      가. 수급인이 최종 총 계약금액의 10%에 해당하는 금원을 보증금액으로 하고 제10항의 하자담보책임기간을 보증기간으로 하는 하도급계약 일반조건 제22조 제1항 각 호의 보증서를 도급인에게 제출할 때까지 도급인은 수급인에 대한 잔여 기성금 또는 정산금 중 최종 총 계약금액의 10%에 해당하는 금원의 지급을 거절하거나 보류할 수 있다.
+    ftc_judgment: 준공검사 전에도 하자보수보증 이행 시까지 기성금 지급 거절·보류 → 법 제3조의4 제1항 위반 (시정명령, 과징금)
+    category: unfair_special_terms
+    acceptable_categories: [unfair_special_terms, payment_deadline, defect_liability]
+    rationale: 부당특약이자, 기성금 지급 보류(대금 지급)이며, 하자보수보증 의무와 연계(하자담보)
+    expected_risk: high
+
+  - id: pc04_daebang_defect_retention_special
+    decision: 공정거래위원회 제3소회의 의결 제2026-085호 (2026. 5. 4.), 사건번호 2024하조0906
+    respondent: 대방건설㈜
+    pdf: data/raw/public_cases/ftc_decision_2026-085_daebang.pdf
+    location: 의결서 4쪽 <표 3> 건설공사 하도급계약 특수조건 발췌 (제9조 최종정산 승인절차 ③)
+    transcribed_from_image: true
+    note: 시험 문서에서는 조 번호만 "제9조" → "제61조"로 바꾼다 (표준 제9조와 충돌 방지). 제목·본문은 원문 그대로
+    text_layer_anchor: 하자보수보증증권을 원사업자에게 제출할때까지 수급사업자에 대한 잔여 기성금 또는 정산금 중 최종 총 계약금액의 10%에 해당하는 금원의 지급을 거절하거나 보류할수 있다
+    clause_text: |-
+      제9조 (최종정산 승인절차)
+      ③ 원사업자는 수급사업자가 최종 총계약금액의 10%에 해당하는 금원을 하자보수보증금으로 원사업자에게 예치하거나 위 금원을 보증금액으로, 계약상 하자담보책임기간을 보증기간으로 하는 하자보수보증증권을 원사업자에게 제출할 때까지 수급사업자에 대한 잔여 기성금 또는 정산금 중 최종 총 계약금액의 10%에 해당하는 금원의 지급을 거절하거나 보류할 수 있다.
+    ftc_judgment: pc03 과 같은 취지의 특수조건 → 법 제3조의4 제1항 위반
+    category: unfair_special_terms
+    acceptable_categories: [unfair_special_terms, payment_deadline, defect_liability]
+    rationale: pc03 과 같음 (계약서 본문 대신 특수조건에 둔 버전)
+    expected_risk: high
+
+  - id: pc05_daebang_waste_cost
+    decision: 공정거래위원회 제3소회의 의결 제2026-085호 (2026. 5. 4.), 사건번호 2024하조0906
+    respondent: 대방건설㈜
+    pdf: data/raw/public_cases/ftc_decision_2026-085_daebang.pdf
+    location: 의결서 22쪽 <표 17> 현장설명개요 상 특약조항 내용
+    transcribed_from_image: true
+    text_layer_anchor: 당초 예상된 폐기물 처리비 금액을 초과하는 경우 무조건
+    clause_text: |-
+      참고사항 : 폐기물 처리시 간접비 항목 중 폐기물 처리비 금원에서 공제처리하며, 이를 초과시 수급사업자 기성금액에서 공제처리함. (잔여 폐기물 처리비의 경우 정산시 감액정산처리)
+    ftc_judgment: 계약 시 책정된 폐기물 처리비 초과분을 원인·책임과 관계없이 수급사업자에게 전적으로 부담 → 법 제3조의4 위반 (시정명령)
+    category: unfair_special_terms
+    acceptable_categories: [unfair_special_terms, payment_deadline]
+    rationale: 비용 전가(부당특약)이며, 초과분을 기성금에서 공제(대금 지급)
+    expected_risk: high

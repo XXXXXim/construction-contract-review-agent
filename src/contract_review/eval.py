@@ -32,6 +32,9 @@ ROOT = Path(__file__).resolve().parents[2]
 DATASETS = {
     "v1": (ROOT / "eval" / "cases", ROOT / "data" / "synthetic"),
     "v2": (ROOT / "eval" / "cases_v2", ROOT / "data" / "synthetic_v2"),  # 조문 참조 재번호 버그 수정판 (11/08)
+    # 공정위 의결서의 실제 부당특약 문구 5건을 표준계약서 뒤 제61조로 붙인 시험 문서
+    # (11/08, scripts/make_public_cases.py)
+    "public": (ROOT / "eval" / "cases_public", ROOT / "data" / "public_cases"),
 }
 CASES, SYN = DATASETS["v1"]
 RESULTS = ROOT / "eval" / "results"
@@ -39,14 +42,16 @@ RESULTS = ROOT / "eval" / "results"
 
 def load_cases(dataset: str = "v1") -> dict[str, list[EvalCase]]:
     out: dict[str, list[EvalCase]] = {}
-    for yml in sorted(DATASETS[dataset][0].glob("synthetic_contract_*.yaml")):
+    for yml in sorted(DATASETS[dataset][0].glob("*_*.yaml")):
         data = yaml.safe_load(yml.read_text(encoding="utf-8"))
         out[yml.stem] = [EvalCase.model_validate(c) for c in data["cases"]]
     return out
 
 
 def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dict:
-    labels = {(c.clause_id, c.category): c for c in cases}
+    def label_for(f: object) -> EvalCase | None:
+        return next((c for c in cases if c.matches(f.clause_id, f.category)), None)
+
     # (clause_id, category) 단위로 센다. 같은 키의 중복 finding 이 precision 을 부풀리지 않게
     uniq: dict[tuple, object] = {}
     for f in report.findings:
@@ -56,25 +61,32 @@ def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dic
     tp_keys: set[tuple[str, str]] = set()
     tp_findings = []
     for f in findings:
-        key = (f.clause_id, f.category)
-        if key in labels:
-            tp_keys.add(key)
-            tp_findings.append((f, labels[key]))
-    cite_ok = sum(1 for f, c in tp_findings if c.standard_clause_id in f.standard_ref)
+        lab = label_for(f)
+        if lab is not None:
+            tp_keys.add((lab.clause_id, lab.category))
+            tp_findings.append((f, lab))
+    # 정답 표준 조항이 정해진 라벨만 citation·hit@3 대상 (set-public 의 실제 특약은 대상 아님)
+    cited = [(f, c) for f, c in tp_findings if c.standard_clause_id]
+    cite_ok = sum(1 for f, c in cited if c.standard_clause_id in f.standard_ref)
     risk_ok = sum(1 for f, c in tp_findings if f.risk_level == c.expected_risk)
+    # 탐지: 카테고리와 관계없이 정답 조항을 지적했는가
+    detected = sum(1 for c in cases if any(f.clause_id == c.clause_id for f in findings))
     hit3 = None
-    if refs is not None:
+    gold = [c for c in cases if c.standard_clause_id]
+    if refs is not None and gold:
         hits = 0
-        for c in cases:
+        for c in gold:
             got = [(r.source_doc, r.clause_id) for r in refs.get(c.clause_id, [])[:3]]
             hits += (c.standard_doc, c.standard_clause_id) in got
-        hit3 = hits / len(cases) if cases else None
+        hit3 = hits / len(gold)
     return {
         "labels": len(cases),
         "findings": len(findings),
         "tp": len(tp_keys),
         "tp_findings": len(tp_findings),
         "cite_ok": cite_ok,
+        "cite_n": len(cited),
+        "detected": detected,
         "risk_ok": risk_ok,
         "hit3": hit3,
         "elapsed_sec": report.stats.elapsed_sec,
@@ -89,9 +101,7 @@ def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dic
             for c in cases
             if (c.clause_id, c.category) not in tp_keys
         ],
-        "false_positives": [
-            f"{f.clause_id}/{f.category.value}" for f in findings if (f.clause_id, f.category) not in labels
-        ],
+        "false_positives": [f"{f.clause_id}/{f.category.value}" for f in findings if label_for(f) is None],
         # 오탐·인용 분석용 원자료 (11/08: baseline citation 0.00 원인을 결과 파일만으로 확인할 수 없었음)
         "findings_detail": [
             {
@@ -102,7 +112,7 @@ def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dic
                 "standard_ref": f.standard_ref,
                 "deviation_summary": f.deviation_summary[:300],
                 "evidence_quote": f.evidence_quote[:200],
-                "label": "TP" if (f.clause_id, f.category) in labels else "FP",
+                "label": "TP" if label_for(f) is not None else "FP",
             }
             for f in findings
         ],
@@ -119,6 +129,8 @@ def aggregate(per: dict[str, dict], config: str, llm_name: str, retrieval_mode: 
             "tp",
             "tp_findings",
             "cite_ok",
+            "cite_n",
+            "detected",
             "risk_ok",
             "input_tokens",
             "output_tokens",
@@ -143,7 +155,8 @@ def aggregate(per: dict[str, dict], config: str, llm_name: str, retrieval_mode: 
         "findings": s["findings"],
         "recall": round(s["tp"] / s["labels"], 4) if s["labels"] else None,
         "precision": round(s["tp_findings"] / s["findings"], 4) if s["findings"] else None,
-        "citation_accuracy": round(s["cite_ok"] / s["tp_findings"], 4) if s["tp_findings"] else None,
+        "citation_accuracy": round(s["cite_ok"] / s["cite_n"], 4) if s["cite_n"] else None,
+        "detection_rate": round(s["detected"] / s["labels"], 4) if s["labels"] else None,
         "risk_match": round(s["risk_ok"] / s["tp_findings"], 4) if s["tp_findings"] else None,
         "retrieval_hit3": round(sum(hit3s) / len(hit3s), 4) if hit3s else None,
         "avg_sec_per_contract": round(sum(p["elapsed_sec"] for p in per.values()) / n, 2),
@@ -176,6 +189,7 @@ def render_result(r: dict) -> str:
         "| 지표 | 값 |",
         "|---|---|",
         f"| Recall | {_fmt(r['recall'])} |",
+        f"| 탐지율 (카테고리 무관) | {_fmt(r.get('detection_rate'))} |",
         f"| Precision | {_fmt(r['precision'])} |",
         f"| Citation accuracy | {_fmt(r['citation_accuracy'])} |",
         f"| Retrieval hit@3 | {_fmt(r['retrieval_hit3'])} |",
@@ -250,6 +264,7 @@ def _cell(r: dict, col: str) -> str:
 def render_compare(results: list[dict]) -> str:
     cols = [
         "recall",
+        "detection_rate",
         "precision",
         "citation_accuracy",
         "retrieval_hit3",
