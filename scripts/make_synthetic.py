@@ -30,8 +30,45 @@ from contract_review.schemas import Category, Clause, EvalCase, RiskLevel
 from contract_review.standards import load_standard_clauses
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT_DIR = ROOT / "data" / "synthetic"
-CASES_DIR = ROOT / "eval" / "cases"
+# 평가셋 버전. v1 은 결과 재현을 위해 그대로 둔다 (CLAUDE.md 규칙 9).
+# v2 = v1 과 같은 시드·같은 변형·같은 삭제 추첨 + 조문 참조 재번호 버그 수정 (2026-11-08)
+DATASETS = {
+    "v1": {"out": ROOT / "data" / "synthetic", "cases": ROOT / "eval" / "cases", "fix_refs": False},
+    "v2": {"out": ROOT / "data" / "synthetic_v2", "cases": ROOT / "eval" / "cases_v2", "fix_refs": True},
+}
+OUT_DIR = DATASETS["v1"]["out"]
+CASES_DIR = DATASETS["v1"]["cases"]
+
+# 조문 참조: "제11조", "제40조를 준용" 등. 바로 앞이 「…법」·시행령·고시면 외부 법령 참조라 건드리지 않는다.
+_REF_RE = re.compile(r"제(\d+)조(?!의)")
+_EXTERNAL_BEFORE = re.compile(r"(」|법|령|규칙|고시)\s*$")
+
+
+def _internal_refs(body: str) -> list[re.Match[str]]:
+    return [m for m in _REF_RE.finditer(body) if not _EXTERNAL_BEFORE.search(body[max(0, m.start() - 14) : m.start()])]
+
+
+def _split_header(text: str) -> tuple[str, str]:
+    """'제n조(제목) 본문' → ('제n조(제목)', ' 본문'). 참조 치환은 본문에만 한다."""
+    i = text.index(")") + 1
+    return text[:i], text[i:]
+
+
+def _remap_refs(text: str, old_to_new: dict[str, str]) -> str:
+    """본문의 계약서 내부 조문 참조를 새 번호로 한 번에 바꾼다 (연쇄 치환 방지)."""
+    head, body = _split_header(text)
+    out, last = [], 0
+    for m in _internal_refs(body):
+        new = old_to_new.get(m.group(0))
+        if new is None:
+            continue
+        out.append(body[last : m.start()])
+        out.append(new)
+        last = m.end()
+    out.append(body[last:])
+    return head + "".join(out)
+
+
 STANDARD_DOC = "ftc_standard_subcontract"
 
 
@@ -298,7 +335,7 @@ def _renumber(text: str, old_id: str, new_id: str) -> str:
 
 
 def build_contract(
-    idx: int, rng: random.Random, standard: list[Clause], k: int, drop: int
+    idx: int, rng: random.Random, standard: list[Clause], k: int, drop: int, fix_refs: bool = False
 ) -> tuple[str, list[EvalCase], dict[str, str]]:
     """(계약서 텍스트, 변형 라벨, 전체 조항 매핑 {합성 clause_id: 표준 clause_id})"""
     contract_id = f"synthetic_contract_{idx:02d}"
@@ -316,7 +353,20 @@ def build_contract(
     # 2) 변형 대상이 아니고 제1·2조(목적·정의)가 아닌 조항 중 drop 개 삭제
     droppable = [c.clause_id for c in standard if c.clause_id not in used and c.clause_id not in {"제1조", "제2조"}]
     dropped = set(rng.sample(droppable, drop))
+    if fix_refs:
+        # v2: 남은 조항이 참조하는 조항은 삭제를 취소한다 (추첨 자체는 v1 과 같게 유지 → 난수 흐름 동일)
+        changed = True
+        while changed:
+            changed = False
+            for c in standard:
+                if c.clause_id in dropped:
+                    continue
+                for m in _internal_refs(_split_header(c.text)[1]):
+                    if m.group(0) in dropped:
+                        dropped.discard(m.group(0))
+                        changed = True
     kept = [c for c in standard if c.clause_id not in dropped]
+    old_to_new = {c.clause_id: f"제{n}조" for n, c in enumerate(kept, start=1)}
     # 3) 재번호 + 변형 주입 + 당사자 명칭 치환
     by_clause = {m.clause_id: m for m in chosen}
     cases: list[EvalCase] = []
@@ -346,6 +396,8 @@ def build_contract(
                     standard_clause_id=c.clause_id,
                 )
             )
+        if fix_refs:
+            text = _remap_refs(text, old_to_new)
         for a, b in PARTY_SUBS:
             text = text.replace(a, b)
         parts.append(text)
@@ -359,17 +411,20 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=3, help="계약서 수")
     ap.add_argument("--k", type=int, default=8, help="계약서당 변형 수")
     ap.add_argument("--drop", type=int, default=10, help="계약서당 삭제할 정상 조항 수")
+    ap.add_argument("--dataset", default="v1", choices=list(DATASETS))
     args = ap.parse_args()
 
+    ds = DATASETS[args.dataset]
+    out_dir, cases_dir = ds["out"], ds["cases"]
     standard = load_standard_clauses()[STANDARD_DOC]
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    CASES_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    cases_dir.mkdir(parents=True, exist_ok=True)
     rng = random.Random(args.seed)
     total = 0
     for i in range(1, args.n + 1):
-        text, cases, clause_map = build_contract(i, rng, standard, args.k, args.drop)
-        (OUT_DIR / f"synthetic_contract_{i:02d}.txt").write_text(text, encoding="utf-8")
-        (CASES_DIR / f"synthetic_contract_{i:02d}.yaml").write_text(
+        text, cases, clause_map = build_contract(i, rng, standard, args.k, args.drop, fix_refs=ds["fix_refs"])
+        (out_dir / f"synthetic_contract_{i:02d}.txt").write_text(text, encoding="utf-8")
+        (cases_dir / f"synthetic_contract_{i:02d}.yaml").write_text(
             yaml.safe_dump(
                 {"cases": [c.model_dump(mode="json") for c in cases], "clause_map": clause_map},
                 allow_unicode=True,
@@ -379,9 +434,9 @@ def main() -> None:
         )
         total += len(cases)
         print(
-            f"{OUT_DIR.name}/synthetic_contract_{i:02d}.txt: 조항 {text.count(chr(10) + '제')}개, 변형 {len(cases)}개"
+            f"{out_dir.name}/synthetic_contract_{i:02d}.txt: 조항 {text.count(chr(10) + '제')}개, 변형 {len(cases)}개"
         )
-    print(f"총 라벨 {total}개 (seed={args.seed})")
+    print(f"총 라벨 {total}개 (dataset={args.dataset}, seed={args.seed})")
 
 
 if __name__ == "__main__":

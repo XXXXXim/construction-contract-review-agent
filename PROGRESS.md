@@ -194,3 +194,27 @@
 - 보스 맥에서 `git pull && LLM_PROVIDER=anthropic bash scripts/run_real_eval.sh` 재실행 (캐시 적중으로 비용 ≈ 0) → findings_detail 확보 → baseline citation 원인 확인
 - 캐시 끄고 시간 재측정 (`LLM_CACHE=0`, v1·v2 비용 다시 발생)
 - 05_traceability.md, 06_retro.md
+
+## 2026-11-08 · 평가셋 set-v2 (생성기 조문 참조 버그 수정판)
+**보스 결정:** set-v1 은 그대로 두고, 버그만 고친 평가셋을 별도 버전으로 만들어 나란히 기록
+
+**한 일**
+- `scripts/make_synthetic.py --dataset v2` → `data/synthetic_v2/`, `eval/cases_v2/`
+  - 같은 시드·같은 변형 추첨·같은 삭제 추첨. 다른 점 두 가지만:
+    1) 본문 속 계약서 내부 조문 참조를 새 번호로 치환 (법령 참조 「…법」 제n조 는 그대로)
+    2) 남은 조항이 참조하는 조항은 삭제 취소 (계약서 02·03 → 조항 52개)
+  - 조사 어색함(갑가, 을는)은 일부러 그대로 둠 (한 번에 한 가지 변경)
+- set-v1 재생성이 기존 파일과 바이트 단위로 동일함 확인 (v1 결과 재현성 유지)
+- `eval.py --dataset v1|v2`, 결과에 `dataset: set-v1|set-v2`, 비교표에 평가셋 열. `run_real_eval.sh` 에 `DATASET` 환경변수
+- 테스트 73개: set-v2 내부 참조 어긋남 0, set-v1 은 버그 유지, 두 평가셋 변형 동일
+
+**숫자**
+- 내부 조문 참조 (변형으로 문장이 바뀐 조항 제외): set-v1 58개 중 54개 어긋남 + 삭제 조항 참조 4개 → set-v2 59개 중 0개
+- **정정:** 앞 기록의 "114개 중 최대 89개"는 법령 조문 참조까지 센 과대 추정이었다. 위 숫자가 정확한 값
+- 검색 hit@3: set-v1 1.00 (150 질의), set-v2 1.00 (154 질의)
+- FakeLLM 은 set-v2 에서 precision 0.74 로 하락: 글자 diff 라 재번호된 참조("제11조"→"제10조")를 차이로 봄. 실제 LLM 이 이걸 정상으로 이해하는지가 set-v2 의 확인 포인트
+- 실제 LLM 예상 비용: 구성 v1·v2 각각 새 호출 약 67/154 (나머지는 캐시) + baseline 3회
+
+**다음 할 일**
+- 보스 맥: `git pull && DATASET=v2 LLM_PROVIDER=anthropic bash scripts/run_real_eval.sh` → push
+- 같은 실행에서 findings_detail 확보를 위해 set-v1 도 재실행 (캐시로 비용 ≈ 0): `LLM_PROVIDER=anthropic bash scripts/run_real_eval.sh`

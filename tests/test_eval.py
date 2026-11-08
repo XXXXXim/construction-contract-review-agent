@@ -47,3 +47,8 @@ def test_results_keep_findings_detail_for_error_analysis() -> None:
     r = ev.run_eval("v2", "fake")
     detail = r["per_contract"]["synthetic_contract_01"]["findings_detail"]
     assert detail and {"clause_id", "standard_ref", "label"} <= set(detail[0])
+
+
+def test_run_eval_on_dataset_v2() -> None:
+    r = ev.run_eval("v2", "fake", dataset="v2")
+    assert r["dataset"] == "set-v2" and r["labels"] == 24

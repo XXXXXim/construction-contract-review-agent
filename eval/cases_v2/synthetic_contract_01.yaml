@@ -1,0 +1,116 @@
+cases:
+- contract_id: synthetic_contract_01
+  clause_id: 제31조
+  category: design_change
+  expected_risk: medium
+  injected_change: 설계변경 대금 조정 기한 30일 → 90일
+  mutation_id: dc_adjust_30_to_90
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제35조
+- contract_id: synthetic_contract_01
+  clause_id: 제34조
+  category: payment_deadline
+  expected_risk: high
+  injected_change: 현금비율 유지 의무 삭제, 전액 어음 지급 허용
+  mutation_id: pay_cash_ratio_removed
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제40조
+- contract_id: synthetic_contract_01
+  clause_id: 제41조
+  category: unfair_special_terms
+  expected_risk: high
+  injected_change: 민원·산재 비용 수급사업자 전가
+  mutation_id: unfair_civil_complaint_cost
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제47조
+- contract_id: synthetic_contract_01
+  clause_id: 제45조
+  category: payment_deadline
+  expected_risk: medium
+  injected_change: 대금지급보증 기한 30일 → 90일
+  mutation_id: guarantee_30_to_90
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제53조
+- contract_id: synthetic_contract_01
+  clause_id: 제46조
+  category: damages_cap
+  expected_risk: medium
+  injected_change: 원사업자 위반 시 3배 배상 → 1배
+  mutation_id: damages_treble_to_single
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제54조
+- contract_id: synthetic_contract_01
+  clause_id: 제48조
+  category: delay_penalty
+  expected_risk: high
+  injected_change: 불가항력 등 지체일수 불산입 사유 삭제
+  mutation_id: delay_exemptions_removed
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제56조
+- contract_id: synthetic_contract_01
+  clause_id: 제49조
+  category: defect_liability
+  expected_risk: medium
+  injected_change: 하자보수보증금 반환 기한 10일 → 90일
+  mutation_id: defect_refund_10_to_90
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제57조
+- contract_id: synthetic_contract_01
+  clause_id: 제50조
+  category: termination
+  expected_risk: medium
+  injected_change: 수급사업자 해지 사유(대금 감소) 40% → 70%
+  mutation_id: term_40_to_70
+  standard_doc: ftc_standard_subcontract
+  standard_clause_id: 제58조
+clause_map:
+  제1조: 제1조
+  제2조: 제2조
+  제3조: 제3조
+  제4조: 제4조
+  제5조: 제5조
+  제6조: 제6조
+  제7조: 제7조
+  제8조: 제8조
+  제9조: 제9조
+  제10조: 제11조
+  제11조: 제12조
+  제12조: 제13조
+  제13조: 제14조
+  제14조: 제15조
+  제15조: 제17조
+  제16조: 제18조
+  제17조: 제19조
+  제18조: 제20조
+  제19조: 제22조
+  제20조: 제24조
+  제21조: 제25조
+  제22조: 제26조
+  제23조: 제27조
+  제24조: 제28조
+  제25조: 제29조
+  제26조: 제30조
+  제27조: 제31조
+  제28조: 제32조
+  제29조: 제33조
+  제30조: 제34조
+  제31조: 제35조
+  제32조: 제37조
+  제33조: 제38조
+  제34조: 제40조
+  제35조: 제41조
+  제36조: 제42조
+  제37조: 제43조
+  제38조: 제44조
+  제39조: 제45조
+  제40조: 제46조
+  제41조: 제47조
+  제42조: 제48조
+  제43조: 제51조
+  제44조: 제52조
+  제45조: 제53조
+  제46조: 제54조
+  제47조: 제55조
+  제48조: 제56조
+  제49조: 제57조
+  제50조: 제58조

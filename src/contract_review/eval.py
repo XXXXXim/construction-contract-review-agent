@@ -27,14 +27,19 @@ from contract_review.graph import CONFIGS, Pipeline
 from contract_review.schemas import EvalCase, ReviewReport
 
 ROOT = Path(__file__).resolve().parents[2]
-CASES = ROOT / "eval" / "cases"
-SYN = ROOT / "data" / "synthetic"
+# 평가셋 버전 (scripts/make_synthetic.py DATASETS 와 같은 경로). 구성(config) v1/v2 와 헷갈리지 않게
+# 결과에는 "set-v1" / "set-v2" 로 적는다.
+DATASETS = {
+    "v1": (ROOT / "eval" / "cases", ROOT / "data" / "synthetic"),
+    "v2": (ROOT / "eval" / "cases_v2", ROOT / "data" / "synthetic_v2"),  # 조문 참조 재번호 버그 수정판 (11/08)
+}
+CASES, SYN = DATASETS["v1"]
 RESULTS = ROOT / "eval" / "results"
 
 
-def load_cases() -> dict[str, list[EvalCase]]:
+def load_cases(dataset: str = "v1") -> dict[str, list[EvalCase]]:
     out: dict[str, list[EvalCase]] = {}
-    for yml in sorted(CASES.glob("synthetic_contract_*.yaml")):
+    for yml in sorted(DATASETS[dataset][0].glob("synthetic_contract_*.yaml")):
         data = yaml.safe_load(yml.read_text(encoding="utf-8"))
         out[yml.stem] = [EvalCase.model_validate(c) for c in data["cases"]]
     return out
@@ -163,7 +168,7 @@ def _fmt(v: object) -> str:
 
 def render_result(r: dict) -> str:
     lines = [
-        f"# 평가 결과: {r['config']} ({r['date']})",
+        f"# 평가 결과: {r['config']} · 평가셋 {r.get('dataset', 'set-v1')} ({r['date']})",
         "",
         f"- LLM: `{r['llm']}` · 검색: `{r['retrieval']}` · 계약서 {r['contracts']}개 · "
         f"라벨 {r['labels']}개 · finding {r['findings']}개",
@@ -196,16 +201,18 @@ def render_result(r: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def run_eval(config: str, llm_provider: str | None = None) -> dict:
+def run_eval(config: str, llm_provider: str | None = None, dataset: str = "v1") -> dict:
     settings = load_settings()
     if llm_provider:
         settings = settings.model_copy(update={"llm_provider": llm_provider})
     pipe = Pipeline(CONFIGS[config], settings=settings)
     per: dict[str, dict] = {}
-    for cid, cases in load_cases().items():
-        out = pipe.run(SYN / f"{cid}.txt", contract_id=cid)
+    syn_dir = DATASETS[dataset][1]
+    for cid, cases in load_cases(dataset).items():
+        out = pipe.run(syn_dir / f"{cid}.txt", contract_id=cid)
         per[cid] = score(out["report"], cases, out.get("refs") if pipe.config.split else None)
     r = aggregate(per, config, pipe.llm.name, pipe.index.mode)
+    r["dataset"] = f"set-{dataset}"
     r["truncated_calls"] = getattr(pipe.llm, "truncated_calls", 0)
     r["cache_hits"] = getattr(pipe.llm, "hits", 0)
     if r["llm_errors"] or r["unparsed_responses"] or r["truncated_calls"]:
@@ -219,6 +226,8 @@ def run_eval(config: str, llm_provider: str | None = None) -> dict:
 def save_result(r: dict) -> Path:
     RESULTS.mkdir(parents=True, exist_ok=True)
     stem = f"{r['date']}_{r['config']}_{r['llm'].replace(':', '-').replace('/', '-')}"
+    if r.get("dataset", "set-v1") != "set-v1":  # set-v1 은 기존 파일명 유지
+        stem += f"_{r['dataset']}"
     (RESULTS / f"{stem}.json").write_text(json.dumps(r, ensure_ascii=False, indent=2), encoding="utf-8")
     md = RESULTS / f"{stem}.md"
     md.write_text(render_result(r), encoding="utf-8")
@@ -237,9 +246,14 @@ def render_compare(results: list[dict]) -> str:
         "avg_llm_calls",
         "dropped_findings",
     ]
-    head = "| config | LLM | " + " | ".join(cols) + " |"
-    sep = "|---|---|" + "---|" * len(cols)
-    rows = [f"| {r['config']} | {r['llm']} | " + " | ".join(_fmt(r.get(c)) for c in cols) + " |" for r in results]
+    head = "| 평가셋 | config | LLM | " + " | ".join(cols) + " |"
+    sep = "|---|---|---|" + "---|" * len(cols)
+    rows = [
+        f"| {r.get('dataset', 'set-v1')} | {r['config']} | {r['llm']} | "
+        + " | ".join(_fmt(r.get(c)) for c in cols)
+        + " |"
+        for r in results
+    ]
     return "\n".join([f"# baseline / v1 / v2 비교 ({date.today().isoformat()})", "", head, sep, *rows]) + "\n"
 
 
@@ -248,11 +262,11 @@ def compare(llm_filter: str | None = None) -> Path:
     if llm_filter:
         results = [r for r in results if r["llm"].startswith(llm_filter)]
     # 같은 (LLM, config) 는 가장 최근 결과 하나만 쓴다 (날짜별 결과 파일이 쌓이므로)
-    latest: dict[tuple[str, str], dict] = {}
+    latest: dict[tuple[str, str, str], dict] = {}
     for r in sorted(results, key=lambda r: r["date"]):
-        latest[(r["llm"], r["config"])] = r
+        latest[(r["llm"], r.get("dataset", "set-v1"), r["config"])] = r
     order = {"baseline": 0, "v1": 1, "v2": 2}
-    results = sorted(latest.values(), key=lambda r: (r["llm"], order.get(r["config"], 9)))
+    results = sorted(latest.values(), key=lambda r: (r["llm"], r.get("dataset", "set-v1"), order.get(r["config"], 9)))
     out = RESULTS / f"{date.today().isoformat()}_compare{'_' + llm_filter if llm_filter else ''}.md"
     out.write_text(render_compare(results), encoding="utf-8")
     return out
@@ -264,12 +278,13 @@ def main() -> None:
     ap.add_argument("--llm", default=None, choices=["fake", "openai", "anthropic"])
     ap.add_argument("--compare", action="store_true")
     ap.add_argument("--llm-filter", default=None)
+    ap.add_argument("--dataset", default="v1", choices=list(DATASETS), help="평가셋 버전 (set-v1 / set-v2)")
     args = ap.parse_args()
     if args.compare:
         p = compare(args.llm_filter)
         print(p.read_text(encoding="utf-8"))
         return
-    r = run_eval(args.config, args.llm)
+    r = run_eval(args.config, args.llm, args.dataset)
     p = save_result(r)
     print(p.read_text(encoding="utf-8"))
     print(f"저장: {p}")

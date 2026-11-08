@@ -26,12 +26,15 @@ ROOT = Path(__file__).resolve().parents[2]
 STANDARD_DOC = "ftc_standard_subcontract"
 
 
-def load_queries() -> list[dict]:
+def load_queries(dataset: str = "v1") -> list[dict]:
+    from contract_review.eval import DATASETS
+
+    cases_dir, syn_dir = DATASETS[dataset]
     out: list[dict] = []
-    for yml in sorted((ROOT / "eval" / "cases").glob("synthetic_contract_*.yaml")):
+    for yml in sorted(cases_dir.glob("synthetic_contract_*.yaml")):
         data = yaml.safe_load(yml.read_text(encoding="utf-8"))
         labeled = {c["clause_id"] for c in data["cases"]}
-        doc = parse_document(ROOT / "data" / "synthetic" / f"{yml.stem}.txt", doc_id=yml.stem)
+        doc = parse_document(syn_dir / f"{yml.stem}.txt", doc_id=yml.stem)
         clauses = {c.clause_id: c for c in split_clauses(doc)}
         for cid, std_cid in data["clause_map"].items():
             out.append({"clause": clauses[cid], "gold": (STANDARD_DOC, std_cid), "labeled": cid in labeled})

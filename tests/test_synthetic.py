@@ -58,3 +58,40 @@ def test_committed_cases_match_contracts() -> None:
         assert len(clauses) - len(cases) > len(cases)
         total += len(cases)
     assert total >= 20
+
+
+# ── 평가셋 v2 (11/08): 조문 참조 재번호 버그 수정판 ──
+def _internal_ref_check(cases_dir: str, syn_dir: str) -> tuple[int, int]:
+    from make_synthetic import _internal_refs, _split_header
+
+    std = {c.clause_id: c for c in load_standard_clauses()[STANDARD_DOC]}
+    bad = total = 0
+    for yml in sorted((ROOT / cases_dir).glob("synthetic_contract_*.yaml")):
+        cm = yaml.safe_load(yml.read_text())["clause_map"]
+        inv = {v: k for k, v in cm.items()}
+        text = (ROOT / syn_dir / f"{yml.stem}.txt").read_text()
+        for c in split_clauses(ParsedDocument(doc_id=yml.stem, text=text, pages=1)):
+            s_refs = [m.group(0) for m in _internal_refs(_split_header(std[cm[c.clause_id]].text)[1])]
+            c_refs = [m.group(0) for m in _internal_refs(_split_header(c.text)[1])]
+            if len(s_refs) != len(c_refs):
+                continue  # 변형으로 문장이 바뀐 조항
+            for sr, cr in zip(s_refs, c_refs, strict=True):
+                total += 1
+                bad += inv.get(sr) != cr
+    return bad, total
+
+
+def test_dataset_v2_has_consistent_cross_references_and_v1_keeps_the_bug() -> None:
+    """FR-12. v2 는 모든 내부 조문 참조가 재번호된 대상을 가리키고, v1 은 원본 그대로(결과 재현용)."""
+    bad2, tot2 = _internal_ref_check("eval/cases_v2", "data/synthetic_v2")
+    bad1, tot1 = _internal_ref_check("eval/cases", "data/synthetic")
+    assert tot2 > 50 and bad2 == 0
+    assert bad1 > 0  # v1 은 일부러 고치지 않는다 (CLAUDE.md 규칙 9)
+
+
+def test_dataset_v2_keeps_same_mutations_as_v1() -> None:
+    for i in (1, 2, 3):
+        v1 = yaml.safe_load((ROOT / f"eval/cases/synthetic_contract_0{i}.yaml").read_text())["cases"]
+        v2 = yaml.safe_load((ROOT / f"eval/cases_v2/synthetic_contract_0{i}.yaml").read_text())["cases"]
+        assert [c["mutation_id"] for c in v1] == [c["mutation_id"] for c in v2]
+        assert [c["standard_clause_id"] for c in v1] == [c["standard_clause_id"] for c in v2]

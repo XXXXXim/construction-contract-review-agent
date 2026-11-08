@@ -6,6 +6,7 @@ cd "$(dirname "$0")/.."
 PY=.venv/bin/python
 : "${LLM_PROVIDER:?LLM_PROVIDER 를 anthropic 또는 openai 로 지정하세요}"
 export LLM_CACHE="${LLM_CACHE:-1}"   # 같은 프롬프트 재호출 비용 0 (재실행 대비)
+DATASET="${DATASET:-v1}"             # 평가셋: v1(원본) | v2(조문 참조 재번호 수정판)
 
 echo "== 1/5 연결 확인 (호출 1회)"
 $PY -c "
@@ -17,13 +18,14 @@ print(f'  {llm.name}: {text.strip()[:30]!r} (토큰 {tin}/{tout})')
 "
 
 for cfg in baseline v1 v2; do
-  echo "== 평가: $cfg"
-  $PY -m contract_review.eval --config "$cfg" | grep -E "Recall|Precision|Citation|처리 시간|실패|잘린|⚠️|저장" || true
+  echo "== 평가: $cfg (평가셋 set-$DATASET)"
+  $PY -m contract_review.eval --config "$cfg" --dataset "$DATASET" | grep -E "Recall|Precision|Citation|처리 시간|실패|잘린|⚠️|저장" || true
 done
 
 echo "== 비교표"
 $PY -m contract_review.eval --compare --llm-filter "$LLM_PROVIDER"
 
+if [ "$DATASET" != "v1" ]; then echo "끝. 결과: eval/results/"; exit 0; fi
 echo "== 샘플 리포트 1건 (v2, 캐시 재사용)"
 $PY - <<'PYEOF'
 from pathlib import Path
