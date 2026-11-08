@@ -169,3 +169,28 @@
 
 **다음 할 일**
 - 보스 맥에서 `scripts/run_real_eval.sh` 실행 → 결과 push → README·02_requirements 상태 갱신 → 05_traceability, 06_retro
+
+## 2026-11-08 · M5 실제 LLM 평가 결과 (claude-sonnet-5-5, 보스 맥에서 실행)
+**숫자**
+| config | Recall | Precision | Citation | Risk match | 입력 토큰/계약서 | 출력 토큰/계약서 |
+|---|---|---|---|---|---|---|
+| baseline | 0.92 (22/24) | 0.81 (22/27) | 0.00 | 0.82 | 42,887 | 8,311 |
+| v1 | 0.96 (23/24) | 0.85 (23/27) | 1.00 | 0.57 | 251,952 | 14,341 |
+| v2 | 1.00 (24/24) | 0.89 (24/27) | 1.00 | 0.62 | 252,158 | 12,826 |
+- LLM 호출 실패 0, JSON 파싱 실패 0, 잘림 0, 근거 검증 폐기 0 (세 config 모두)
+
+**분석**
+- v1 → v2 개선은 전부 규칙 레이어: `dc_pay_15_to_60`(contract_03 제28조)을 v1은 payment_deadline 으로 오분류(누락 1 + 오탐 1), v2는 규칙이 design_change 로 잡음
+- 근거 검증은 이번 데이터에서 효과 0 (Sonnet 인용이 전부 실존). "환각 차단" 효과는 측정되지 않았다고 기록
+- v1·v2 남은 오탐 제11조/design_change ×3 = **평가셋 생성기 버그**: 재번호 시 본문 조문 참조를 안 고침 → 제11조가 "제11조에 따른 서면"으로 자기 참조. 계약서 내 조문 참조 114개 중 최대 89개가 어긋남(법률 조문 참조 포함 상한값). LLM 은 실제 결함을 지적한 것
+- baseline citation 0.00: 원인 미확인. 결과 JSON 에 finding 원문이 없었음 → `findings_detail` 저장 추가 (재실행 필요, 캐시로 비용 0)
+- 처리 시간: LLM_CACHE=1 로 돌려 v1(32/150)·v2(141/150) 캐시 적중 → 시간 비교 무효. baseline 53초만 유효
+- risk_match 는 baseline 이 최고 (0.82)
+
+**결정이 필요한 것 (보스)**
+- 생성기 버그 수정판(평가셋 v2)을 만들지. CLAUDE.md 규칙 9에 따라 현재판 결과는 그대로 두고, 수정판을 **별도 버전**으로 나란히 기록하는 방식 제안
+
+**다음 할 일**
+- 보스 맥에서 `git pull && LLM_PROVIDER=anthropic bash scripts/run_real_eval.sh` 재실행 (캐시 적중으로 비용 ≈ 0) → findings_detail 확보 → baseline citation 원인 확인
+- 캐시 끄고 시간 재측정 (`LLM_CACHE=0`, v1·v2 비용 다시 발생)
+- 05_traceability.md, 06_retro.md

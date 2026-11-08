@@ -40,3 +40,10 @@ def test_precision_counts_unique_clause_category(monkeypatch) -> None:
     )
     s = ev.score(rep, [case], None)
     assert s["findings"] == 1 and s["tp"] == 1 and s["cite_ok"] == 1
+
+
+def test_results_keep_findings_detail_for_error_analysis() -> None:
+    """FR-13. 결과 파일만으로 오탐·인용을 분석할 수 있어야 한다."""
+    r = ev.run_eval("v2", "fake")
+    detail = r["per_contract"]["synthetic_contract_01"]["findings_detail"]
+    assert detail and {"clause_id", "standard_ref", "label"} <= set(detail[0])

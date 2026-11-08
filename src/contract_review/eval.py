@@ -87,6 +87,20 @@ def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dic
         "false_positives": [
             f"{f.clause_id}/{f.category.value}" for f in findings if (f.clause_id, f.category) not in labels
         ],
+        # 오탐·인용 분석용 원자료 (11/08: baseline citation 0.00 원인을 결과 파일만으로 확인할 수 없었음)
+        "findings_detail": [
+            {
+                "clause_id": f.clause_id,
+                "category": f.category.value,
+                "risk_level": f.risk_level.value,
+                "source": f.source,
+                "standard_ref": f.standard_ref,
+                "deviation_summary": f.deviation_summary[:300],
+                "evidence_quote": f.evidence_quote[:200],
+                "label": "TP" if (f.clause_id, f.category) in labels else "FP",
+            }
+            for f in findings
+        ],
     }
 
 

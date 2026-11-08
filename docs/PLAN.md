@@ -32,13 +32,13 @@
 - [x] `llm_judge` 구조화 출력 + `evidence_quote` 검증 (지목 조항 본문 부분문자열, 실패 시 폐기)
 - [x] `report` (MD + JSON, 면책 고지)
 - [x] LangGraph 조립 (baseline/v1/v2 경로), `FakeLLM` E2E 테스트 통과
-- [ ] 실제 LLM으로 리포트 1건 생성 ← **API 키 필요**
+- [x] 실제 LLM으로 리포트 1건 생성 (`eval/results/sample_report/`, claude-sonnet-5-5)
 
 ## M5: baseline / v1 / v2 비교 평가
 - [x] `make eval-baseline`, `make eval CONFIG=v1`, `make eval` (fake 판정기로 동작 확인)
 - [x] 비교표 `eval/results/{날짜}_compare.md` 저장 (fake)
-- [ ] 실제 LLM으로 baseline/v1/v2 측정 ← **API 키 필요**
-- [ ] 무엇을 바꿨더니 어떤 지표가 얼마나 변했는지 PROGRESS에 기록
+- [x] 실제 LLM으로 baseline/v1/v2 측정 (claude-sonnet-5-5, 11/08)
+- [x] 무엇을 바꿨더니 어떤 지표가 얼마나 변했는지 PROGRESS·README에 기록
 
 ## M6: Streamlit UI + Dockerfile
 - [x] PDF 업로드 → 리포트 표시/다운로드 (`app/streamlit_app.py`)

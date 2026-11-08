@@ -20,13 +20,13 @@
 | FR-04 | 계약서 조항마다 대응 표준 조항 top-k 를 찾는다 | Must | 합성셋 변형 조항 hit@3 ≥ 0.8 | ✅ (1.00) | `test_retrieval_hit_at_3_on_synthetic_set_is_reasonable` |
 | FR-05 | 임베딩을 쓸 수 있으면 BM25와 합치고(하이브리드), 없으면 BM25만으로 동작한다 | Should | `EMBEDDING_PROVIDER=none` 에서 정상 동작 | 🟡 BM25만 검증. 하이브리드는 키가 없어 미실행 | `test_bm25_finds_standard_clause_for_rewritten_text` |
 | FR-06 | 숫자 항목(기한·비율·배수)을 LLM 없이 규칙으로 판정한다 | Must | 기준값은 원문 인용과 함께 두고, 인용이 원문에 있는지 테스트로 확인 | ✅ (기준값 15개 중 규칙 사용 14개) | `test_rule_detects_longer_payment_deadline`, `test_threshold_quote_exists_in_source` |
-| FR-07 | LLM 이 조항별로 카테고리·위험도·근거를 구조화 출력(JSON)으로 판정한다 | Must | 7개 카테고리 + other, high/medium/low | 🟡 FakeLLM 으로만 검증. **실제 LLM 미실행** | `test_fake_llm_reads_prompt_format_and_finds_diff`, `test_parse_variants` |
+| FR-07 | LLM 이 조항별로 카테고리·위험도·근거를 구조화 출력(JSON)으로 판정한다 | Must | 7개 카테고리 + other, high/medium/low | ✅ claude-sonnet-5-5 로 실행 (11/08), 파싱 실패 0 | `test_fake_llm_reads_prompt_format_and_finds_diff`, `test_parse_variants` |
 | FR-08 | LLM 근거 인용이 지목한 표준 조항 본문에 실제로 있는지 검증하고, 없으면 버린다 | Must | 지어낸 인용은 폐기, 문장부호만 다른 진짜 인용은 통과 | ✅ | `test_fabricated_evidence_is_dropped_but_real_quote_kept`, `test_judge_keeps_real_quote_with_different_middle_dot` |
 | FR-09 | 같은 조항·카테고리를 규칙과 LLM 이 둘 다 지적하면 규칙 결과를 쓴다 | Should | 중복 제거 후 (조항, 카테고리)당 1건 | ✅ | `test_dedupe_prefers_rule_then_higher_risk` |
 | FR-10 | 한국어 마크다운 + JSON 리포트를 위험도순으로 만든다 | Must | 근거 인용, 면책 고지, 처리 통계 포함 | ✅ | `test_report_sorted_by_risk_and_has_disclaimer`, `test_e2e_v2_with_fake_llm_on_synthetic_contract` |
-| FR-11 | LLM provider 를 설정으로 바꾼다 (`fake`/`openai`/`anthropic`) | Must | 코드 수정 없이 환경변수로 전환 | 🟡 fake 만 실행 확인 | `test_settings_default_fake` |
+| FR-11 | LLM provider 를 설정으로 바꾼다 (`fake`/`openai`/`anthropic`) | Must | 코드 수정 없이 환경변수로 전환 | ✅ fake, anthropic 실행 확인 (openai 미실행) | `test_settings_default_fake` |
 | FR-12 | 시드 고정 합성 평가셋을 만든다 | Must | 계약서 3개, 라벨 20개 이상, 정상 조항 포함, 재실행 시 동일 | ✅ (라벨 24개) | `test_generation_is_deterministic`, `test_committed_cases_match_contracts` |
-| FR-13 | baseline / v1 / v2 를 같은 평가셋에서 비교한다 | Must | Recall, Precision, Citation, hit@3, 시간, 토큰을 표로 저장 | 🟡 하네스 동작 ✅, **실제 LLM 숫자 ❌** | `test_run_eval_v2_and_baseline_produce_metrics` |
+| FR-13 | baseline / v1 / v2 를 같은 평가셋에서 비교한다 | Must | Recall, Precision, Citation, hit@3, 시간, 토큰을 표로 저장 | ✅ 실제 LLM 비교표 `eval/results/2026-11-08_compare_anthropic.md` | `test_run_eval_v2_and_baseline_produce_metrics` |
 | FR-14 | PDF 업로드 → 리포트 웹 화면 | Should | `make run` 으로 실행, 리포트 다운로드 | ✅ (헬스체크 확인, 자동 테스트 없음) | 수동 확인 |
 | FR-15 | Docker 이미지로 실행한다 | Could | `docker build` 성공, 컨테이너 안에서 파이프라인 실행 | ✅ (세션 프록시 CA 추가한 검증용 Dockerfile 기준) | 수동 확인 |
 | FR-16 | 조항 수정안 자동 생성 | Won't | – | – | – |
@@ -43,8 +43,8 @@
 | NFR-06 | 데이터 윤리 | 공개 자료만 쓰고, 평가 데이터는 `synthetic` 표기 | 파일명, README | ✅ |
 | NFR-07 | 평가 정직성 | 숫자를 좋게 보이려고 평가셋을 고치지 않는다. 나빠진 숫자도 기록한다 | 라벨 파일 변경 이력 | ✅ (v2 risk_match 0.45 < v1 0.59 그대로 기록) |
 | NFR-08 | 장애 내성 | LLM 호출 하나가 실패해도 평가 전체가 멈추지 않는다 | 재시도 5회, 실패는 그 조항만 제외하고 집계 | ✅ `test_llm_error_is_isolated_per_clause` |
-| NFR-09 | 성능 | 계약서당 처리 시간을 기록한다 | 평가 결과표 | 🟡 FakeLLM 0.5초. 실제 LLM 은 조항 50회 순차 호출이라 수 분 예상, 미측정 |
-| NFR-10 | 비용 | 계약서당 토큰과 비용을 기록한다. 단가는 기억으로 쓰지 않는다 | `PRICE_IN_PER_1M` 등 환경변수가 있을 때만 비용 계산 | 🟡 실제 LLM 미측정 |
+| NFR-09 | 성능 | 계약서당 처리 시간을 기록한다 | 평가 결과표 | 🟡 baseline 53초/계약서. v1·v2 는 캐시 적중으로 측정 무효, 재측정 필요 |
+| NFR-10 | 비용 | 계약서당 토큰과 비용을 기록한다. 단가는 기억으로 쓰지 않는다 | `PRICE_IN_PER_1M` 등 환경변수가 있을 때만 비용 계산 | 🟡 토큰만 기록 (baseline 43k / v2 252k 입력). 단가 미입력 |
 | NFR-11 | 의존성 | 허용 목록 밖 패키지는 승인 후 추가 | `pyproject.toml` | ✅ (pyhwp 는 1회 변환에만 쓰고 의존성에 넣지 않음) |
 
 ## 제약 조건
@@ -54,6 +54,4 @@
 - **시간:** 11/7 MVP, 11/15 서류 마감
 
 ## 요약: 아직 Must 인데 미완료인 것
-| ID | 무엇이 막혔나 | 필요한 것 |
-|---|---|---|
-| FR-07, FR-11, FR-13 | 실제 LLM 으로 판정·비교한 숫자가 없다 | **API 키 1개** (`04_readiness.md` R-01) |
+없음 (2026-11-08 실제 LLM 평가로 FR-07, FR-11, FR-13 완료). 남은 것은 NFR-09(처리 시간 재측정), NFR-10(비용).
