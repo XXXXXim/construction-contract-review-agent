@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-08",
+  "config": "baseline",
+  "llm": "anthropic:claude-sonnet-5-5",
+  "retrieval": "bm25",
+  "contracts": 3,
+  "labels": 24,
+  "findings": 27,
+  "recall": 0.9167,
+  "precision": 0.8148,
+  "citation_accuracy": 0.0,
+  "risk_match": 0.8182,
+  "retrieval_hit3": null,
+  "avg_sec_per_contract": 53.02,
+  "avg_input_tokens": 42887,
+  "avg_output_tokens": 8311,
+  "avg_llm_calls": 1.0,
+  "dropped_findings": 0,
+  "llm_errors": 0,
+  "unparsed_responses": 0,
+  "avg_cost_usd": null,
+  "per_contract": {
+    "synthetic_contract_01": {
+      "labels": 8,
+      "findings": 8,
+      "tp": 7,
+      "tp_findings": 7,
+      "cite_ok": 0,
+      "risk_ok": 7,
+      "hit3": null,
+      "elapsed_sec": 46.67,
+      "input_tokens": 43478,
+      "output_tokens": 7295,
+      "llm_calls": 1,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [
+        "제50조/termination (term_40_to_70)"
+      ],
+      "false_positives": [
+        "제18조/damages_cap"
+      ]
+    },
+    "synthetic_contract_02": {
+      "labels": 8,
+      "findings": 9,
+      "tp": 8,
+      "tp_findings": 8,
+      "cite_ok": 0,
+      "risk_ok": 6,
+      "hit3": null,
+      "elapsed_sec": 48.19,
+      "input_tokens": 42203,
+      "output_tokens": 7616,
+      "llm_calls": 1,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [],
+      "false_positives": [
+        "제16조/damages_cap"
+      ]
+    },
+    "synthetic_contract_03": {
+      "labels": 8,
+      "findings": 10,
+      "tp": 7,
+      "tp_findings": 7,
+      "cite_ok": 0,
+      "risk_ok": 5,
+      "hit3": null,
+      "elapsed_sec": 64.19,
+      "input_tokens": 42981,
+      "output_tokens": 10022,
+      "llm_calls": 1,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [
+        "제28조/design_change (dc_pay_15_to_60)"
+      ],
+      "false_positives": [
+        "제16조/delay_penalty",
+        "제32조/payment_deadline",
+        "제26조/unfair_special_terms"
+      ]
+    }
+  },
+  "truncated_calls": 0,
+  "cache_hits": 0
+}

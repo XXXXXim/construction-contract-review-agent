@@ -1,0 +1,89 @@
+{
+  "date": "2026-11-08",
+  "config": "v1",
+  "llm": "anthropic:claude-sonnet-5-5",
+  "retrieval": "bm25",
+  "contracts": 3,
+  "labels": 24,
+  "findings": 27,
+  "recall": 0.9583,
+  "precision": 0.8519,
+  "citation_accuracy": 1.0,
+  "risk_match": 0.5652,
+  "retrieval_hit3": 1.0,
+  "avg_sec_per_contract": 35.4,
+  "avg_input_tokens": 251952,
+  "avg_output_tokens": 14341,
+  "avg_llm_calls": 50.0,
+  "dropped_findings": 0,
+  "llm_errors": 0,
+  "unparsed_responses": 0,
+  "avg_cost_usd": null,
+  "per_contract": {
+    "synthetic_contract_01": {
+      "labels": 8,
+      "findings": 9,
+      "tp": 8,
+      "tp_findings": 8,
+      "cite_ok": 8,
+      "risk_ok": 6,
+      "hit3": 1.0,
+      "elapsed_sec": 39.39,
+      "input_tokens": 254896,
+      "output_tokens": 13753,
+      "llm_calls": 50,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [],
+      "false_positives": [
+        "제11조/design_change"
+      ]
+    },
+    "synthetic_contract_02": {
+      "labels": 8,
+      "findings": 9,
+      "tp": 8,
+      "tp_findings": 8,
+      "cite_ok": 8,
+      "risk_ok": 4,
+      "hit3": 1.0,
+      "elapsed_sec": 33.24,
+      "input_tokens": 248968,
+      "output_tokens": 14094,
+      "llm_calls": 50,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [],
+      "false_positives": [
+        "제11조/design_change"
+      ]
+    },
+    "synthetic_contract_03": {
+      "labels": 8,
+      "findings": 9,
+      "tp": 7,
+      "tp_findings": 7,
+      "cite_ok": 7,
+      "risk_ok": 3,
+      "hit3": 1.0,
+      "elapsed_sec": 33.57,
+      "input_tokens": 251993,
+      "output_tokens": 15176,
+      "llm_calls": 50,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [
+        "제28조/design_change (dc_pay_15_to_60)"
+      ],
+      "false_positives": [
+        "제11조/design_change",
+        "제28조/payment_deadline"
+      ]
+    }
+  },
+  "truncated_calls": 0,
+  "cache_hits": 32
+}

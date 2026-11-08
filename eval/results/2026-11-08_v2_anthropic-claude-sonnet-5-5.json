@@ -1,0 +1,86 @@
+{
+  "date": "2026-11-08",
+  "config": "v2",
+  "llm": "anthropic:claude-sonnet-5-5",
+  "retrieval": "bm25",
+  "contracts": 3,
+  "labels": 24,
+  "findings": 27,
+  "recall": 1.0,
+  "precision": 0.8889,
+  "citation_accuracy": 1.0,
+  "risk_match": 0.625,
+  "retrieval_hit3": 1.0,
+  "avg_sec_per_contract": 4.77,
+  "avg_input_tokens": 252158,
+  "avg_output_tokens": 12826,
+  "avg_llm_calls": 50.0,
+  "dropped_findings": 0,
+  "llm_errors": 0,
+  "unparsed_responses": 0,
+  "avg_cost_usd": null,
+  "per_contract": {
+    "synthetic_contract_01": {
+      "labels": 8,
+      "findings": 9,
+      "tp": 8,
+      "tp_findings": 8,
+      "cite_ok": 8,
+      "risk_ok": 6,
+      "hit3": 1.0,
+      "elapsed_sec": 4.76,
+      "input_tokens": 255175,
+      "output_tokens": 12003,
+      "llm_calls": 50,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [],
+      "false_positives": [
+        "제11조/design_change"
+      ]
+    },
+    "synthetic_contract_02": {
+      "labels": 8,
+      "findings": 9,
+      "tp": 8,
+      "tp_findings": 8,
+      "cite_ok": 8,
+      "risk_ok": 5,
+      "hit3": 1.0,
+      "elapsed_sec": 3.52,
+      "input_tokens": 249107,
+      "output_tokens": 12981,
+      "llm_calls": 50,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [],
+      "false_positives": [
+        "제11조/design_change"
+      ]
+    },
+    "synthetic_contract_03": {
+      "labels": 8,
+      "findings": 9,
+      "tp": 8,
+      "tp_findings": 8,
+      "cite_ok": 8,
+      "risk_ok": 4,
+      "hit3": 1.0,
+      "elapsed_sec": 6.04,
+      "input_tokens": 252193,
+      "output_tokens": 13495,
+      "llm_calls": 50,
+      "dropped": 0,
+      "llm_errors": 0,
+      "unparsed": 0,
+      "missed": [],
+      "false_positives": [
+        "제11조/design_change"
+      ]
+    }
+  },
+  "truncated_calls": 0,
+  "cache_hits": 141
+}
