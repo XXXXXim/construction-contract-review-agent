@@ -1,7 +1,9 @@
 # CLAUDE.md: 건설 하도급 계약 검토 에이전트
 
 > 새 세션은 **`PROGRESS.md`를 먼저 읽고** 마지막 "다음 할 일"부터 이어서 작업한다.
-> 스펙은 `docs/SPEC.md`, 일정은 `docs/PLAN.md`를 따른다.
+> 개발 단계 문서: `docs/01_brief.md`(문제) → `02_requirements.md`(FR/NFR) → `03_design.md`(스택·아키텍처) →
+> `04_readiness.md`(준비물·리스크) → `PLAN.md`(일정). 상세 스키마는 `docs/SPEC.md`.
+> 요구사항이 바뀌면 `02_requirements.md`를 먼저 고친다. 새 테스트에는 관련 요구사항 ID(FR-xx)를 docstring에 적는다.
 
 ## 프로젝트 한 줄 요약
 하도급 계약서(PDF)를 표준하도급계약서·표준도급계약서·하도급법과 **조항별로 비교**하고, 불리하거나 표준에서 벗어난 조항을 **근거 인용과 함께** 찾아내는 LangGraph 파이프라인. 공개 자료만 쓰는 개인 포트폴리오 프로젝트이며, 성능은 `make eval`의 **측정값**으로 증명한다.
@@ -22,6 +24,10 @@
 .
 ├── CLAUDE.md               # 이 파일 (하네스 규칙)
 ├── PROGRESS.md             # 진행 로그. 새 세션은 여기부터 읽는다
+├── docs/01_brief.md        # P0 문제 정의 (고객, 성공 지표, 가정)
+├── docs/02_requirements.md # P1 요구사항 (FR/NFR, 수용 기준, 상태)
+├── docs/03_design.md       # P2 설계 (ADR, 아키텍처, 컴포넌트)
+├── docs/04_readiness.md    # P3 준비물·리스크
 ├── docs/SPEC.md            # 입력·출력 스키마, 카테고리, 판정 기준, 비범위
 ├── docs/PLAN.md            # 마일스톤 체크리스트
 ├── src/contract_review/

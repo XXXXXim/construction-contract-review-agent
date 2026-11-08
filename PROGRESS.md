@@ -139,3 +139,17 @@
 
 **다음 할 일**
 - API 키 확보 → `LLM_CACHE=1 make eval-baseline && make eval CONFIG=v1 && make eval` → `--compare` → README 숫자 교체
+
+## 2026-11-08 · P0~P3 문서 사후 작성
+**한 일**
+- 개발 프로세스(P0~P7)를 정하고, 건너뛴 앞 단계를 거꾸로 채움: `docs/01_brief.md`, `02_requirements.md`, `03_design.md`, `04_readiness.md`
+- 요구사항에 ID 부여: FR 17개(Won't 2개 포함), NFR 11개, 각각 상태와 검증 테스트 연결
+- ADR 11개 (오케스트레이션, 분할, 검색, 벡터 저장소, 숫자 판정, 환각 대응, provider, 평가 데이터, HWP, UI, 스키마): 후보 비교, 선택 이유, 트레이드오프
+- 준비물 12개를 이 세션에서 명령으로 직접 확인 (API 키 ❌, API 호스트 도달 ✅, 정부 사이트 ❌, docker 데몬 재시작으로 꺼짐)
+- CLAUDE.md 에 문서 순서와 규칙 추가
+
+**숫자**
+- Must 요구사항 중 미완료: FR-07, FR-11, FR-13 (전부 API 키 하나가 원인)
+
+**다음 할 일**
+- R-01 API 키 확보 → 실제 LLM baseline/v1/v2 평가 → 02 상태 갱신 → 05_traceability.md(P6), 06_retro.md(P7)
