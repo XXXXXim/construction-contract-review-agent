@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -70,6 +71,20 @@ class RuleHit(BaseModel):
     description: str = ""
 
 
+class CitationIssue(BaseModel):
+    """조문 인용 검증 결과 하나 (contract_review.citation_check, FR-19)."""
+
+    kind: Literal[
+        "missing_article", "missing_paragraph", "number_mismatch", "title_mismatch", "unsourced_number", "out_of_scope"
+    ]
+    ref: str  # 예: "하도급법 제15조(감액금지)"
+    detail: str = ""
+
+    @property
+    def is_error(self) -> bool:
+        return self.kind in {"missing_article", "missing_paragraph", "number_mismatch", "title_mismatch"}
+
+
 class Finding(BaseModel):
     clause_id: str
     category: Category
@@ -79,6 +94,7 @@ class Finding(BaseModel):
     deviation_summary: str
     evidence_quote: str  # 기준 문서에 실제로 있는 문자열이어야 함 (코드 검증)
     source: str = Field(default="llm", pattern="^(rule|llm)$")
+    citation_issues: list[CitationIssue] = []  # v2: 근거·설명문 속 조문 인용을 원문과 대조한 결과
 
 
 class ReportStats(BaseModel):

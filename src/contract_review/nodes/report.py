@@ -25,7 +25,8 @@ def render_markdown(report: ReviewReport) -> str:
         f"(높음 {counts['high']} / 중간 {counts['medium']} / 낮음 {counts['low']})",
         f"- 처리 {report.stats.elapsed_sec:.1f}초 · LLM 호출 {report.stats.llm_calls}회 · "
         f"토큰 입력 {report.stats.input_tokens:,} / 출력 {report.stats.output_tokens:,} · "
-        f"근거 검증 실패로 제외 {report.stats.dropped_findings}건",
+        f"근거 검증 실패로 제외 {report.stats.dropped_findings}건 · "
+        f"인용 확인 필요 {sum(1 for f in fs if f.citation_issues)}건",
         "",
         "## 요약",
         "",
@@ -48,6 +49,11 @@ def render_markdown(report: ReviewReport) -> str:
             "",
             f"> {f.evidence_quote}",
             "",
+            *(
+                ["**⚠️ 인용 확인 필요 (원문 대조):**", "", *[f"- `{i.ref}`: {i.detail}" for i in f.citation_issues], ""]
+                if f.citation_issues
+                else []
+            ),
             "**계약서 원문 (발췌):**",
             "",
             "```",

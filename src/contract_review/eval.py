@@ -22,6 +22,7 @@ from pathlib import Path
 
 import yaml
 
+from contract_review.citation_check import check_text
 from contract_review.config import load_settings
 from contract_review.graph import CONFIGS, Pipeline
 from contract_review.schemas import EvalCase, ReviewReport
@@ -48,7 +49,12 @@ def load_cases(dataset: str = "v1") -> dict[str, list[EvalCase]]:
     return out
 
 
-def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dict:
+def score(
+    report: ReviewReport, cases: list[EvalCase], refs: dict | None, clause_texts: dict[str, str] | None = None
+) -> dict:
+    """clause_texts: 조항 전문 (출처 없는 숫자 확인용. 없으면 Finding 의 400자 발췌를 쓴다)."""
+    clause_texts = clause_texts or {}
+
     def label_for(f: object) -> EvalCase | None:
         return next((c for c in cases if c.matches(f.clause_id, f.category)), None)
 
@@ -69,6 +75,16 @@ def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dic
     cited = [(f, c) for f, c in tp_findings if c.standard_clause_id]
     cite_ok = sum(1 for f, c in cited if c.standard_clause_id in f.standard_ref)
     risk_ok = sum(1 for f, c in tp_findings if f.risk_level == c.expected_risk)
+    # FR-19 조문 인용 검증: 구성 플래그와 무관하게 세 구성 모두 같은 검사기로 채점
+    checks = {
+        id(f): check_text("", "")
+        if f.source == "rule"  # 규칙 판정은 원문 인용 기준값으로 만들어져 검사 대상 아님
+        else check_text(f"{f.standard_ref} | {f.deviation_summary}", clause_texts.get(f.clause_id, f.contract_text))
+        for f in findings
+    }
+    citation_errors = sum(len(c.errors) for c in checks.values())
+    citation_checked = sum(len(c.checked) for c in checks.values())
+    unsourced = sum(1 for c in checks.values() for i in c.issues if i.kind == "unsourced_number")
     # 탐지: 카테고리와 관계없이 정답 조항을 지적했는가
     detected = sum(1 for c in cases if any(f.clause_id == c.clause_id for f in findings))
     hit3 = None
@@ -86,6 +102,9 @@ def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dic
         "tp_findings": len(tp_findings),
         "cite_ok": cite_ok,
         "cite_n": len(cited),
+        "citation_errors": citation_errors,
+        "citation_checked": citation_checked,
+        "unsourced_numbers": unsourced,
         "detected": detected,
         "risk_ok": risk_ok,
         "hit3": hit3,
@@ -113,6 +132,9 @@ def score(report: ReviewReport, cases: list[EvalCase], refs: dict | None) -> dic
                 "deviation_summary": f.deviation_summary[:300],
                 "evidence_quote": f.evidence_quote[:200],
                 "label": "TP" if label_for(f) is not None else "FP",
+                "citation_issues": [
+                    f"{i.kind}: {i.ref[:60]}" for i in checks[id(f)].issues if i.kind != "out_of_scope"
+                ],
             }
             for f in findings
         ],
@@ -130,6 +152,9 @@ def aggregate(per: dict[str, dict], config: str, llm_name: str, retrieval_mode: 
             "tp_findings",
             "cite_ok",
             "cite_n",
+            "citation_errors",
+            "citation_checked",
+            "unsourced_numbers",
             "detected",
             "risk_ok",
             "input_tokens",
@@ -157,6 +182,9 @@ def aggregate(per: dict[str, dict], config: str, llm_name: str, retrieval_mode: 
         "precision": round(s["tp_findings"] / s["findings"], 4) if s["findings"] else None,
         "citation_accuracy": round(s["cite_ok"] / s["cite_n"], 4) if s["cite_n"] else None,
         "detection_rate": round(s["detected"] / s["labels"], 4) if s["labels"] else None,
+        "citation_errors": s["citation_errors"],
+        "citation_checked": s["citation_checked"],
+        "unsourced_numbers": s["unsourced_numbers"],
         "risk_match": round(s["risk_ok"] / s["tp_findings"], 4) if s["tp_findings"] else None,
         "retrieval_hit3": round(sum(hit3s) / len(hit3s), 4) if hit3s else None,
         "avg_sec_per_contract": round(sum(p["elapsed_sec"] for p in per.values()) / n, 2),
@@ -199,6 +227,9 @@ def render_result(r: dict) -> str:
         f"| 계약서당 토큰 (입력/출력) | {r['avg_input_tokens']:,} / {r['avg_output_tokens']:,} |",
         f"| 계약서당 LLM 호출 | {_fmt(r['avg_llm_calls'])} |",
         f"| 근거 검증으로 제외된 finding | {r['dropped_findings']} |",
+        f"| 조문 인용 오류 / 대조한 인용 (FR-19) | {r.get('citation_errors', '–')} / "
+        f"{r.get('citation_checked', '–')} |",
+        f"| 출처 없는 숫자 (경고) | {r.get('unsourced_numbers', '–')} |",
         f"| LLM 호출 실패 / JSON 파싱 실패 | {r.get('llm_errors', 0)} / {r.get('unparsed_responses', 0)} |",
         f"| max_tokens 로 잘린 응답 / 캐시 적중 | {r.get('truncated_calls', 0)} / {r.get('cache_hits', 0)} |",
         f"| 계약서당 비용(USD) | {_fmt(r['avg_cost_usd'])} |",
@@ -225,7 +256,12 @@ def run_eval(config: str, llm_provider: str | None = None, dataset: str = "v1") 
     syn_dir = DATASETS[dataset][1]
     for cid, cases in load_cases(dataset).items():
         out = pipe.run(syn_dir / f"{cid}.txt", contract_id=cid)
-        per[cid] = score(out["report"], cases, out.get("refs") if pipe.config.split else None)
+        per[cid] = score(
+            out["report"],
+            cases,
+            out.get("refs") if pipe.config.split else None,
+            {c.clause_id: c.text for c in out.get("clauses", [])},
+        )
     r = aggregate(per, config, pipe.llm.name, pipe.index.mode)
     r["dataset"] = f"set-{dataset}"
     r["run_at"] = datetime.now().isoformat(timespec="seconds")
@@ -273,6 +309,7 @@ def render_compare(results: list[dict]) -> str:
         "avg_input_tokens",
         "avg_llm_calls",
         "dropped_findings",
+        "citation_errors",
     ]
     head = "| 평가셋 | config | LLM | " + " | ".join(cols) + " |"
     sep = "|---|---|---|" + "---|" * len(cols)

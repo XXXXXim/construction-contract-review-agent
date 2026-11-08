@@ -20,6 +20,7 @@ from typing import TypedDict
 from langgraph.graph import END, StateGraph
 from pydantic import BaseModel
 
+from contract_review.citation_check import annotate
 from contract_review.config import Settings, load_settings
 from contract_review.llm import JudgeLLM, get_llm
 from contract_review.nodes.llm_judge import dedupe_findings, llm_judge, rule_hit_to_finding
@@ -46,6 +47,7 @@ class PipelineConfig(BaseModel):
     use_rules: bool = True
     verify_evidence: bool = True
     use_embeddings: bool = True  # 키 없으면 자동 BM25
+    check_citations: bool = False  # FR-19: 근거·설명문 속 조문 인용을 원문과 대조해 리포트에 표시 (판정은 바꾸지 않음)
     top_k: int = 3
 
 
@@ -54,7 +56,7 @@ CONFIGS: dict[str, PipelineConfig] = {
         name="baseline", split=False, use_rules=False, verify_evidence=False, use_embeddings=False
     ),
     "v1": PipelineConfig(name="v1", use_rules=False, verify_evidence=False, use_embeddings=False),
-    "v2": PipelineConfig(name="v2"),
+    "v2": PipelineConfig(name="v2", check_citations=True),
 }
 
 
@@ -131,7 +133,11 @@ class Pipeline:
             st.llm_errors += res.error
             st.unparsed_responses += res.unparsed
             findings += res.findings
-        return {"findings": dedupe_findings(findings)}  # 같은 조항·카테고리는 규칙 판정 우선
+        findings = dedupe_findings(findings)  # 같은 조항·카테고리는 규칙 판정 우선
+        if self.config.check_citations:
+            full = {c.clause_id: c.text for c in clauses}
+            findings = [annotate(f, full.get(f.clause_id)) for f in findings]
+        return {"findings": findings}
 
     def n_judge_whole(self, s: ReviewState) -> ReviewState:
         """baseline: 계약서 전체를 한 조항처럼 LLM 에 한 번에 넣는다. 검색·규칙·검증 없음."""

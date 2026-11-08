@@ -33,6 +33,7 @@
 ├── docs/05_traceability.md # P6 요구사항 추적표
 ├── docs/06_retro.md        # P7 회고 (KPT)
 ├── docs/07_final_report.md # 최종 보고 (지표, 자소서 3줄, 면접 질문)
+├── docs/citation_audit.md  # 조문 인용 검증 결과 (scripts/audit_citations.py 자동 생성)
 ├── docs/SPEC.md            # 입력·출력 스키마, 카테고리, 판정 기준, 비범위
 ├── docs/PLAN.md            # 마일스톤 체크리스트
 ├── src/contract_review/
@@ -48,6 +49,8 @@
 ├── data/synthetic_v2/      # 합성 계약서 set-v2 (조문 참조 재번호 수정판)
 ├── eval/cases/*.yaml       # 정답 라벨 set-v1
 ├── eval/cases_v2/*.yaml    # 정답 라벨 set-v2
+├── data/public_cases/      # set-public: 공정위 의결서 실제 문구 (cases.yaml + 시험 문서)
+├── eval/cases_public/      # 정답 라벨 set-public
 ├── eval/results/           # {날짜}_{config}.md 평가 결과
 └── tests/
 ```
