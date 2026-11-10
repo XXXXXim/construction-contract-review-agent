@@ -8,7 +8,6 @@
 | `molit_standard_contract_private_2026-34.pdf` | 민간건설공사 표준도급계약서 (국토교통부고시 제2026-34호, 별표 포함) | 국토교통부 (molit.go.kr) | 2026-01-16 고시 |
 
 | `ftc_standard_subcontract_construction_20251121.hwp` / `.txt` | 건설업종 표준하도급계약서 **최신 개정판** (txt 는 hwp5txt 변환) | 공정거래위원회 | 2025-11-21 개정 (보스 제공 2026-11-08) |
-| `reference/hdec_subcontract_act_guideline_2024.pdf` | 현대건설 하도급법 가이드라인(부문별 편람) | 현대건설 공개 PDF | 2024-12-02 1차 개정. **참고용**, 기준값 출처로 쓰지 않음 |
 
 ### 2025-11-21 개정판과 파이프라인의 관계
 - 파이프라인·평가셋(set-v1, set-v2)은 **2024-12-24판**을 그대로 쓴다 (결과 재현성).
