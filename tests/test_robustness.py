@@ -180,3 +180,19 @@ def test_anthropic_client_does_not_set_temperature(monkeypatch) -> None:
     llm = get_llm(Settings(llm_provider="anthropic"))
     assert llm.model.temperature is None
     assert llm.model.max_tokens >= 16000
+
+
+# ── 11/10 설치 분리: chromadb·langchain-openai 는 선택 설치 [embedding] ──
+def test_missing_embedding_extra_falls_back_or_explains(monkeypatch) -> None:
+    """FR-05·FR-11. 선택 설치가 없으면 임베딩은 BM25 로 돌아가고, OpenAI LLM 은 설치 방법을 알려준다."""
+    import sys
+
+    from contract_review.config import Settings
+    from contract_review.llm import get_llm
+    from contract_review.retrieval import make_embedder
+
+    monkeypatch.setitem(sys.modules, "langchain_openai", None)  # import 시 ImportError
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-dummy")
+    assert make_embedder("openai") is None
+    with pytest.raises(RuntimeError, match=r"\[embedding\]"):
+        get_llm(Settings(llm_provider="openai"))

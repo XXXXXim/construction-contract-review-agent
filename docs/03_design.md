@@ -20,7 +20,7 @@
 | ADR-10 | UI | ① FastAPI + React ② **Streamlit** | Streamlit | 화면 꾸미기는 비범위이고, 하루 안에 업로드 → 리포트 흐름을 만들 수 있다 | 다중 사용자·인증·커스텀 디자인 불가 |
 | ADR-11 | 설정·스키마 | dict 로 주고받기 vs **pydantic** | pydantic v2 | 노드 경계, LLM 응답, 평가 라벨을 타입으로 검증한다. 잘못된 카테고리·위험도 값은 바로 걸러진다 | 모델 정의 코드가 늘어난다 |
 
-설치 버전 (2026-11-08 기준 `.venv`): langgraph 1.2.19, langchain-core 1.7.4, langchain-openai 1.7.3, langchain-anthropic 1.7.9, chromadb 1.5.9, rank-bm25 0.2.2, pypdf 6.21.4, pydantic 2.14.2, streamlit 1.66.1. `pyproject.toml` 은 버전을 고정하지 않는다 (개선 여지).
+설치 버전: `pyproject.toml` 에 범위로 고정 (하한 = 테스트한 버전, 상한 = 다음 메이저 전, ruff 는 마이너 고정, 2026-11-10). chromadb·langchain-openai 는 선택 설치 `[embedding]`. 테스트한 버전: langgraph 1.2.19, langchain-core 1.7.4, langchain-anthropic 1.7.9, rank-bm25 0.2.2, pypdf 6.21.4, pydantic 2.14.2, streamlit 1.66.1 (선택: chromadb 1.5.9, langchain-openai 1.7.3).
 
 ## 2. 아키텍처
 
@@ -104,4 +104,4 @@ flowchart LR
 ## 7. 사후 회고: 설계에서 아쉬운 점
 - **ADR-01:** LangGraph 를 쓰지만 지금은 직선형이다. "근거 검증 실패 → 재판정" 루프를 넣으면 LangGraph 를 쓸 이유가 분명해진다.
 - **ADR-08:** 합성셋이 쉬워서 검색(hit@3 = 1.00)이 비교에서 변별력이 없다. 문장을 다시 쓴 어려운 변형을 넣은 평가셋이 필요하다.
-- **의존성 버전 고정 없음:** 재현성을 위해 lock 파일이나 버전 상한이 필요하다.
+- **의존성 버전 고정 없음:** 재현성을 위해 lock 파일이나 버전 상한이 필요하다. → 2026-11-10 버전 범위 지정으로 일부 해소 (lock 파일은 아직 없음).

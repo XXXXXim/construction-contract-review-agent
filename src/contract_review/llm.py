@@ -162,7 +162,12 @@ def _make_llm(settings: Settings) -> JudgeLLM:
     if p == "openai":
         if not os.getenv("OPENAI_API_KEY"):
             raise RuntimeError("LLM_PROVIDER=openai 인데 OPENAI_API_KEY 가 없음")
-        from langchain_openai import ChatOpenAI
+        try:
+            from langchain_openai import ChatOpenAI
+        except ImportError as e:  # 선택 설치 (pyproject [embedding])
+            raise RuntimeError(
+                "LLM_PROVIDER=openai 에는 langchain-openai 가 필요합니다: pip install -e '.[embedding]'"
+            ) from e
 
         model = os.getenv("OPENAI_MODEL", DEFAULT_MODELS["openai"])
         return LangChainLLM(

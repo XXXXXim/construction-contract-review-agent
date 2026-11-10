@@ -1,0 +1,25 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: 설치 (기본 의존성 + dev, 선택 설치 [embedding] 제외)
+        run: make setup PY=python
+      - name: 테스트 (API 키 없이 FakeLLM)
+        run: make test
+      - name: 린트
+        run: make lint

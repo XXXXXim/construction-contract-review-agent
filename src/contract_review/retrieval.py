@@ -70,7 +70,11 @@ def make_embedder(provider: str) -> Embedder | None:
 
         if not os.getenv("OPENAI_API_KEY"):
             return None
-        from langchain_openai import OpenAIEmbeddings
+        try:
+            import chromadb  # noqa: F401  (인덱스 생성 때 쓴다)
+            from langchain_openai import OpenAIEmbeddings
+        except ImportError:  # 선택 설치 (pyproject [embedding]) 가 없으면 BM25 단독으로 동작
+            return None
 
         return OpenAIEmbeddings(model="text-embedding-3-small")
     return None

@@ -1,5 +1,7 @@
 # 건설 하도급 계약 검토 보조 에이전트
 
+[![test](https://github.com/XXXXXim/construction-contract-review-agent/actions/workflows/test.yml/badge.svg)](https://github.com/XXXXXim/construction-contract-review-agent/actions/workflows/test.yml)
+
 하도급 계약서를 표준하도급계약서·하도급법과 조항별로 대조해, 수급사업자에게 불리한 조항을 **원문 근거와 함께** 찾는 LangGraph 파이프라인입니다.
 
 | 구성 (claude-sonnet-5-5) | Recall | Precision | 근거 조항 정확도 | 조문 인용 오류 | 입력 토큰/계약서 |
@@ -12,7 +14,7 @@
 **한계:** 합성 평가셋, 정답 24개 (조문 인용 오류는 평가셋 3종 합계, 나머지는 set-v2 1회 실행). ⚠️ 법률 자문이 아닌 검토 보조 도구입니다.
 
 ```bash
-make setup && make test   # 설치 + 테스트 (API 키 불필요)
+make setup && make test   # 설치 + 테스트 (API 키 불필요, 새 환경 기준 약 2분)
 make run                  # Streamlit: 계약서 PDF 업로드 → 리포트
 LLM_PROVIDER=anthropic ANTHROPIC_API_KEY=... bash scripts/run_real_eval.sh   # 실제 LLM 평가
 ```
@@ -212,6 +214,11 @@ make test                       # 키 없이 통과
 make eval                       # v2 평가 → eval/results/
 make run                        # Streamlit: PDF 업로드 → 리포트
 docker build -t contract-review . && docker run -p 8501:8501 --env-file .env contract-review
+```
+
+선택 설치: 하이브리드 검색(`EMBEDDING_PROVIDER=openai`)이나 `LLM_PROVIDER=openai` 를 쓸 때만 필요합니다. 없으면 BM25 단독으로 동작합니다.
+```bash
+.venv/bin/pip install -e ".[embedding]"   # chromadb, langchain-openai
 ```
 
 실제 LLM 평가 팁: `LLM_CACHE=1`이면 같은 프롬프트 응답을 `.cache/llm/`에 저장해 재실행 비용이 0이 된다

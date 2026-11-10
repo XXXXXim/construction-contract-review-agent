@@ -7,22 +7,23 @@ name = "contract-review"
 version = "0.1.0"
 description = "건설 하도급 계약 검토 보조 에이전트 (공개 자료 기반 포트폴리오 프로젝트)"
 requires-python = ">=3.11"
+# 하한 = 실제로 테스트한 버전 (2026-11-10), 상한 = 다음 메이저 전.
 dependencies = [
-    "langgraph",
-    "langchain-core",
-    "langchain-openai",
-    "langchain-anthropic",
-    "chromadb",
-    "rank-bm25",
-    "pypdf",
-    "pydantic>=2",
-    "streamlit",
-    "pyyaml",
-    "python-dotenv",
+    "langgraph>=1.2,<2",
+    "langchain-core>=1.7,<2",
+    "langchain-anthropic>=1.7,<2",
+    "rank-bm25>=0.2.2,<0.3",
+    "pypdf>=6.21,<7",  # 텍스트 추출 결과가 버전마다 다를 수 있어 테스트한 버전부터
+    "pydantic>=2.14,<3",
+    "streamlit>=1.66,<2",
+    "pyyaml>=6.0,<7",
+    "python-dotenv>=1.2,<2",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "ruff"]
+# 선택: 하이브리드 검색(EMBEDDING_PROVIDER=openai)과 LLM_PROVIDER=openai 에 필요. 기본 설치(BM25 + Anthropic/fake)에는 불필요
+embedding = ["chromadb>=1.5,<2", "langchain-openai>=1.7,<2"]
+dev = ["pytest>=9,<10", "ruff>=0.17,<0.18"]  # ruff 는 마이너 버전마다 포맷 규칙이 바뀌어 고정
 
 [tool.setuptools.packages.find]
 where = ["src"]
