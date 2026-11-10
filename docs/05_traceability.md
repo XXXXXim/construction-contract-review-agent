@@ -37,7 +37,7 @@
 | NFR-06 | 공개 자료·synthetic 표기 | `data/raw/README.md`, `data/synthetic*/README.md` | 파일명·README | ✅ |
 | NFR-07 | 평가 정직성 | set-v1 라벨·계약서 미수정, 수정판은 별도 set-v2 | `test_dataset_v2_..._v1_keeps_the_bug` | ✅ 나쁜 숫자(risk_match, 근거 검증 효과 0)도 기록 |
 | NFR-08 | 장애 내성 | 재시도 5회, 조항별 실패 격리, 캐시 | `test_llm_error_is_isolated_per_clause`, `test_cached_llm_reuses_response` | ✅ 실측 호출 실패 0 |
-| NFR-09 | 처리 시간 기록 | `eval.py` `timing_valid` | `test_save_result_does_not_overwrite_same_day_run` | 🟡 baseline 48~53초/계약서만 유효. v1·v2 는 캐시 적중으로 미측정 |
+| NFR-09 | 처리 시간 기록 | `eval.py` `timing_valid` | `test_save_result_does_not_overwrite_same_day_run` | ✅ 캐시 끄고 실측 (set-v2, 11/10): baseline 44.9 · v1 44.2 · v2 40.4 초/계약서 ||
 | NFR-10 | 비용 기록 | 토큰 기록, 단가는 환경변수로만 | – | 🟡 토큰만 (입력 baseline 43.6k / v2 257.9k 계약서당) |
 | NFR-11 | 의존성 통제 | `pyproject.toml` 허용 목록만 | – | ✅ |
 
@@ -45,5 +45,4 @@
 | ID | 상태 | 이유 | 해결 방법 |
 |---|---|---|---|
 | FR-05 | 🟡 | 임베딩용 OpenAI 키 없음 | OpenAI 키 확보 후 `EMBEDDING_PROVIDER=openai` 로 hit@3 비교. 단, 합성셋 BM25 hit@3 가 이미 1.00 이라 이 평가셋으로는 차이를 볼 수 없다 |
-| NFR-09 | 🟡 | 평가를 캐시 켠 채 실행 | `LLM_CACHE=0 DATASET=v2 LLM_PROVIDER=anthropic bash scripts/run_real_eval.sh` (v1·v2 호출 비용 재발생) |
 | NFR-10 | 🟡 | 단가를 기억으로 쓰지 않는 규칙 | 공식 가격 페이지 확인 후 `PRICE_IN_PER_1M`, `PRICE_OUT_PER_1M` 설정 |
