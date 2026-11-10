@@ -377,3 +377,14 @@
 ## 2026-11-10 · 공개 준비 [8] LICENSE
 - 루트 `LICENSE` (MIT, 저작권자: 심혁 — 초기 기획 문서에 보스가 밝힌 이름)
 - `data/raw/README.md`: MIT 는 코드·작성 문서에만 적용, 공개 원문(법령·고시·표준계약서·의결서)은 각 기관 자료로 대상 아님. README 9절 라이선스 추가
+
+## 2026-11-10 · [7] 확인 결과 (CI·Docker)
+- GitHub Actions 첫 실행: Python 3.11·3.13 모두 성공 (setup → test 103 → lint). https://github.com/XXXXXim/construction-contract-review-agent/actions/runs/42810913834
+- Docker: Docker Hub 429 로 2회 실패 후 3회째 빌드 성공 (120초). 세션 프록시 CA 2줄만 더한 검증용 Dockerfile 사용 (원본 Dockerfile 은 그대로).
+  컨테이너: Python 3.11.18, 선택 패키지 0개, set-v2 contract_01 v2 실행 성공(fake, 조항 50), Streamlit 헬스체크 ok
+
+**다음 할 일 (보스)**
+- [5] 맥에서 캐시로 set-v2 샘플 리포트 재생성 → push
+- README 스크린샷 `docs/images/streamlit_report.png`, 보도 기사 링크 2개
+- 과거 커밋 `0ca1ed4` 의 현대건설 PDF 를 히스토리에서도 지울지 결정 (force push 필요)
+- (선택) `LLM_CACHE=0` 으로 set-v2 처리 시간 측정 → push 하면 README 의 "처리 시간 비교 불가"를 실측값으로 교체
