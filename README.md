@@ -294,3 +294,7 @@ eval/
 tests/                102개 (키 없이 실행)
 docs/                 01~07 개발 단계 문서, SPEC, PLAN, citation_audit, raw_clauses     PROGRESS.md  진행 로그
 ```
+
+## 9. 라이선스
+
+코드와 작성자가 만든 문서는 [MIT](LICENSE). `data/raw/` 의 법령·표준계약서·공정위 의결서 원문은 각 기관의 공개 자료로 MIT 대상이 아니며, 자세한 내용은 [`data/raw/README.md`](data/raw/README.md) 를 보세요.

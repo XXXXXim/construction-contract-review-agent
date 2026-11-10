@@ -366,3 +366,14 @@
 - PLAN M1 "33 passed", PROGRESS 날짜별 숫자: 그 시점 기록이라 유지
 - 06_retro "커밋 15개": 회고 커밋 직전 기준으로 맞음 (회고 커밋 포함 16)
 - SPEC 7절 "변형 7~10개, 라벨 20개 이상": 목표 사양이고 실제(8개·24개)와 모순 아님
+
+## 2026-11-10 · 공개 준비 [7] 설치 안정화 + CI
+- `pyproject.toml`: 버전 범위 지정 (하한 = 테스트한 버전, 상한 = 다음 메이저 전, ruff 마이너 고정). chromadb·langchain-openai → 선택 설치 `[embedding]`
+- 선택 설치가 없으면: 임베딩은 BM25 단독으로 자동 전환, `LLM_PROVIDER=openai` 는 설치 방법을 알려주는 오류. 회귀 테스트 추가 → **테스트 103개**
+- 새 환경 측정 (레포 새 복제 + pip 캐시 끔, Python 3.13): `make setup` 88초 + `make test` 39초 = **127초**, 103 passed, 선택 패키지 미설치 확인
+- `.github/workflows/test.yml`: push·PR 에서 Python 3.11·3.13 으로 `make setup` → `make test` → `make lint`. README 배지 추가
+- Docker: 첫 빌드 시도에서 Docker Hub 429(익명 pull 횟수 제한)로 베이스 이미지 다운로드 실패 → 1분 간격 재시도 (결과는 아래 기록)
+
+## 2026-11-10 · 공개 준비 [8] LICENSE
+- 루트 `LICENSE` (MIT, 저작권자: 심혁 — 초기 기획 문서에 보스가 밝힌 이름)
+- `data/raw/README.md`: MIT 는 코드·작성 문서에만 적용, 공개 원문(법령·고시·표준계약서·의결서)은 각 기관 자료로 대상 아님. README 9절 라이선스 추가
