@@ -334,3 +334,8 @@
 - 작성자 역할 근거: PROGRESS·docs 의 "보스 결정/보스 제공" 기록 (원문 제공, 의결서 제공·승인, set-v1 유지·set-v2 결정, SPEC 승인, 실제 LLM 평가 실행)
   + 기록에는 없지만 **보스가 2026-11-10 사실로 확인한 항목**: 초기 기획(목표·절대 규칙·마일스톤) 작성, 개발 프로세스(P0~P7) 정형화 요청, 검증 범위(결함 분석·실제 사례 평가·조문 번호 검증) 요청
 - 보스 승인 초안에서 한 곳만 정확성 수정: "생성기 버그 발견 후" → "버그가 확인된 뒤" (버그 확인은 분석 과정에서 이뤄짐)
+
+## 2026-11-10 · 공개 준비 [3] README 첫 화면 요약
+- 맨 위 18줄(빈 줄 제외 14줄): 한 줄 문제 정의, 결과표(baseline/v1/v2 × Recall·Precision·근거 조항 정확도·조문 인용 오류·입력 토큰), 핵심 메시지(근거 정확성 40→0, set-public 에서 baseline 도 5/5), 한계 한 줄, 실행 명령 3줄
+- 숫자 출처: `eval/results/2026-11-08_*_anthropic-claude-sonnet-5-5_set-v2.json` (Recall·Precision·정확도·토큰), 조문 인용 오류는 `scripts/audit_citations.py` 로 세 평가셋 결과를 재채점한 합계 (set-v1 15 + set-v2 24 + set-public 1)
+- 기존 내용은 삭제 없이 "# 상세" 아래로 이동. 스크린샷 자리: `docs/images/streamlit_report.png` (README 에 주석 처리된 이미지 줄)
