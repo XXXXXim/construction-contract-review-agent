@@ -388,3 +388,5 @@
 - README 스크린샷 `docs/images/streamlit_report.png`, 보도 기사 링크 2개
 - 과거 커밋 `0ca1ed4` 의 현대건설 PDF 를 히스토리에서도 지울지 결정 (force push 필요)
 - (선택) `LLM_CACHE=0` 으로 set-v2 처리 시간 측정 → push 하면 README 의 "처리 시간 비교 불가"를 실측값으로 교체
+
+- 정정: [6] 에서 문서 테스트 수를 102 로 맞췄으나 [7] 에서 회귀 테스트 1개를 추가해 103 이 됨 → README·02·05·06 을 103 으로 다시 맞춤

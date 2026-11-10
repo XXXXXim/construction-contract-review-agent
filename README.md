@@ -91,7 +91,7 @@ flowchart LR
 - **법령 수치는 기억으로 쓰지 않는다.** 규칙 기준값 14개는 전부 `data/thresholds.yaml`에 원문 인용과 함께 있고, `tests/test_thresholds.py`가 인용이 해당 조항 본문에 실제로 있는지 검증한다. 원문에 숫자가 없는 지체상금 요율·하자담보 기간 상한은 `TODO(source-needed)`로 두고 규칙에서 제외했다.
 - **LLM 인용 검증**: `evidence_quote`는 LLM이 지목한 표준 조항 본문의 부분문자열(공백 무시)이어야 한다. 아니면 그 finding은 버리고 개수를 리포트에 적는다.
 - **규칙 판정 우선**: 같은 조항·카테고리를 규칙과 LLM이 둘 다 지적하면 규칙 결과를 쓴다.
-- `FakeLLM`(표준 top-1과 문장 diff) 덕분에 **API 키 없이 `make test` 102개가 통과**한다.
+- `FakeLLM`(표준 top-1과 문장 diff) 덕분에 **API 키 없이 `make test` 103개가 통과**한다.
 
 ## 3. 평가
 
@@ -291,7 +291,7 @@ data/
 eval/
   cases/ · cases_v2/ · cases_public/   평가셋별 정답 라벨
   results/            평가 결과 (JSON + MD), sample_report/
-tests/                102개 (키 없이 실행)
+tests/                103개 (키 없이 실행)
 docs/                 01~07 개발 단계 문서, SPEC, PLAN, citation_audit, raw_clauses     PROGRESS.md  진행 로그
 ```
 
