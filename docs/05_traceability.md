@@ -1,7 +1,7 @@
 # P6. 요구사항 추적표
 
 > 2026-11-08 기준. 요구사항(`02_requirements.md`) → 설계(`03_design.md`) → 구현 → 테스트 → 결과를 한 줄로 잇는다.
-> 테스트는 `make test` (74 passed, API 키 불필요). "실측"은 실제 LLM(claude-sonnet-5-5) 평가 결과다.
+> 테스트는 `make test` (102 passed, API 키 불필요). "실측"은 실제 LLM(claude-sonnet-5-5) 평가 결과다.
 
 ## 기능 요구사항
 | ID | 요구사항 | 설계 | 구현 | 검증 | 결과 |
@@ -29,9 +29,9 @@
 ## 비기능 요구사항
 | ID | 요구사항 | 구현·근거 | 검증 | 결과 |
 |---|---|---|---|---|
-| NFR-01 | 법령 수치를 기억으로 쓰지 않음 | `data/thresholds.yaml` 15개 기준값 전부 원문 인용 보유 | `test_threshold_quote_exists_in_source` | ✅ TODO(source-needed) 2건(지체상금 요율, 하자담보 기간 상한) |
+| NFR-01 | 법령 수치를 기억으로 쓰지 않음 | `data/thresholds.yaml` 18개 항목(값 있음 16, TODO 2) 전부 원문 인용 보유, 규칙 사용 14 | `test_threshold_quote_exists_in_source` | ✅ TODO(source-needed) 2건(지체상금 요율, 하자담보 기간 상한) |
 | NFR-02 | 법률 자문 아님 고지 | `schemas.DISCLAIMER` → 리포트·UI | `test_report_sorted_by_risk_and_has_disclaimer` | ✅ |
-| NFR-03 | 키 없이 테스트 통과 | `FakeLLM`, `LLM_PROVIDER=fake` 기본 | `make test` | ✅ 74 passed |
+| NFR-03 | 키 없이 테스트 통과 | `FakeLLM`, `LLM_PROVIDER=fake` 기본 | `make test` | ✅ 102 passed |
 | NFR-04 | 재현성 | 시드 고정, 결과 파일 덮어쓰기 방지 | `test_generation_is_deterministic`, set-v1 바이트 동일 재생성 | ✅ |
 | NFR-05 | 키 보안 | 환경변수만, `.env` gitignore | 코드 검토 | ✅ 실측은 보스 맥에서 `read -s` 로 입력 |
 | NFR-06 | 공개 자료·synthetic 표기 | `data/raw/README.md`, `data/synthetic*/README.md` | 파일명·README | ✅ |

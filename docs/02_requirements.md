@@ -19,7 +19,7 @@
 | FR-03 | 별첨·부칙·장래 시행 조문을 본문과 분리한다 | Should | 법령의 `[시행일: …]` 중복 조문, 고시의 별표가 따로 분류된다 | ✅ | `test_addendum_and_annex_sections`, `test_law_future_versions_are_separated`, `test_molit_contract_body_is_annex_after_addendum` |
 | FR-04 | 계약서 조항마다 대응 표준 조항 top-k 를 찾는다 | Must | 합성셋 변형 조항 hit@3 ≥ 0.8 | ✅ (1.00) | `test_retrieval_hit_at_3_on_synthetic_set_is_reasonable` |
 | FR-05 | 임베딩을 쓸 수 있으면 BM25와 합치고(하이브리드), 없으면 BM25만으로 동작한다 | Should | `EMBEDDING_PROVIDER=none` 에서 정상 동작 | 🟡 BM25만 검증. 하이브리드는 키가 없어 미실행 | `test_bm25_finds_standard_clause_for_rewritten_text` |
-| FR-06 | 숫자 항목(기한·비율·배수)을 LLM 없이 규칙으로 판정한다 | Must | 기준값은 원문 인용과 함께 두고, 인용이 원문에 있는지 테스트로 확인 | ✅ (기준값 15개 중 규칙 사용 14개) | `test_rule_detects_longer_payment_deadline`, `test_threshold_quote_exists_in_source` |
+| FR-06 | 숫자 항목(기한·비율·배수)을 LLM 없이 규칙으로 판정한다 | Must | 기준값은 원문 인용과 함께 두고, 인용이 원문에 있는지 테스트로 확인 | ✅ (기준값 항목 18개: 값 있음 16, TODO 2 / 규칙 사용 14개) | `test_rule_detects_longer_payment_deadline`, `test_threshold_quote_exists_in_source` |
 | FR-07 | LLM 이 조항별로 카테고리·위험도·근거를 구조화 출력(JSON)으로 판정한다 | Must | 7개 카테고리 + other, high/medium/low | ✅ claude-sonnet-5-5 로 실행 (11/08), 파싱 실패 0 | `test_fake_llm_reads_prompt_format_and_finds_diff`, `test_parse_variants` |
 | FR-08 | LLM 근거 인용이 지목한 표준 조항 본문에 실제로 있는지 검증하고, 없으면 버린다 | Must | 지어낸 인용은 폐기, 문장부호만 다른 진짜 인용은 통과 | ✅ | `test_fabricated_evidence_is_dropped_but_real_quote_kept`, `test_judge_keeps_real_quote_with_different_middle_dot` |
 | FR-09 | 같은 조항·카테고리를 규칙과 LLM 이 둘 다 지적하면 규칙 결과를 쓴다 | Should | 중복 제거 후 (조항, 카테고리)당 1건 | ✅ | `test_dedupe_prefers_rule_then_higher_risk` |
@@ -39,7 +39,7 @@
 |---|---|---|---|---|
 | NFR-01 | 신뢰성 | **법령 수치와 조문을 기억으로 쓰지 않는다.** 모든 기준값은 원문 인용과 출처를 가진다 | `test_threshold_quote_exists_in_source` 통과. 원문에 없으면 `TODO(source-needed)` | ✅ (TODO 2건: 지체상금 요율, 하자담보 기간 상한) |
 | NFR-02 | 법적 고지 | 모든 리포트에 "법률 자문이 아닌 검토 보조 도구" 고지를 넣는다 | 리포트 MD·JSON·UI 에 포함 | ✅ |
-| NFR-03 | 테스트 용이성 | API 키 없이 `make test` 가 통과한다 | 키 없는 환경에서 74 passed | ✅ |
+| NFR-03 | 테스트 용이성 | API 키 없이 `make test` 가 통과한다 | 키 없는 환경에서 102 passed | ✅ |
 | NFR-04 | 재현성 | 평가 데이터와 결과가 재실행 시 같다 | 시드 고정, 해시 비교 테스트 | ✅ |
 | NFR-05 | 보안 | API 키는 환경변수로만 읽고, 커밋·출력하지 않는다 | `.env` gitignore, 키 값을 다루는 코드 없음 | ✅ |
 | NFR-06 | 데이터 윤리 | 공개 자료만 쓰고, 평가 데이터는 `synthetic` 표기 | 파일명, README | ✅ |

@@ -89,7 +89,7 @@ flowchart LR
 - **법령 수치는 기억으로 쓰지 않는다.** 규칙 기준값 14개는 전부 `data/thresholds.yaml`에 원문 인용과 함께 있고, `tests/test_thresholds.py`가 인용이 해당 조항 본문에 실제로 있는지 검증한다. 원문에 숫자가 없는 지체상금 요율·하자담보 기간 상한은 `TODO(source-needed)`로 두고 규칙에서 제외했다.
 - **LLM 인용 검증**: `evidence_quote`는 LLM이 지목한 표준 조항 본문의 부분문자열(공백 무시)이어야 한다. 아니면 그 finding은 버리고 개수를 리포트에 적는다.
 - **규칙 판정 우선**: 같은 조항·카테고리를 규칙과 LLM이 둘 다 지적하면 규칙 결과를 쓴다.
-- `FakeLLM`(표준 top-1과 문장 diff) 덕분에 **API 키 없이 `make test` 47개가 통과**한다.
+- `FakeLLM`(표준 top-1과 문장 diff) 덕분에 **API 키 없이 `make test` 102개가 통과**한다.
 
 ## 3. 평가
 
@@ -258,19 +258,32 @@ CLI로 리포트 1건:
 
 ```
 src/contract_review/
-  schemas.py        pydantic (Clause, RetrievedRef, RuleHit, Finding, ReviewReport, EvalCase)
-  nodes/            parse · split_clauses · retrieve_standard · rule_check · llm_judge · report
-  retrieval.py      BM25 + 선택적 임베딩(RRF)
-  thresholds.py     data/thresholds.yaml 로더
-  standards.py      기준 문서 로더 + 인용 검증
-  llm.py            provider 팩토리, FakeLLM
-  graph.py          LangGraph StateGraph (baseline/v1/v2)
-  eval.py           평가 하네스, 비교표
-data/raw/           공개 원문 (하도급법, 표준하도급계약서, 표준도급계약서)
-data/thresholds.yaml 규칙 기준값 (원문 인용 포함)
-data/synthetic/     합성 계약서 (SYNTHETIC)
-eval/cases/         정답 라벨   eval/results/  평가 결과
-scripts/            make_synthetic.py · inspect_raw.py
-app/streamlit_app.py
-docs/               SPEC.md · PLAN.md · raw_clauses.md     PROGRESS.md  진행 로그
+  schemas.py          pydantic (Clause, RetrievedRef, RuleHit, Finding, CitationIssue, ReviewReport, EvalCase)
+  nodes/              parse · split_clauses · retrieve_standard · rule_check · llm_judge · report
+  retrieval.py        BM25 + 선택적 임베딩(RRF)
+  thresholds.py       data/thresholds.yaml 로더
+  standards.py        기준 문서 로더 + 인용 존재 확인
+  textnorm.py         비교용 정규화 (공백·문장부호 ㆍ/·, 「」, 전각 괄호)
+  citation_check.py   조문 인용 검증 (FR-19)
+  llm.py              provider 팩토리, FakeLLM, 재시도·캐시
+  graph.py            LangGraph StateGraph (baseline/v1/v2)
+  eval.py             평가 하네스, 비교표       eval_retrieval.py  검색 hit@k 평가
+app/streamlit_app.py  UI: PDF/TXT 업로드 → 리포트
+scripts/
+  make_synthetic.py   합성 평가셋 생성 (--dataset v1|v2, 시드 고정)
+  make_public_cases.py  공정위 의결서 실제 문구 시험 문서 생성
+  run_real_eval.sh    실제 LLM 평가 일괄 실행 (DATASET=v1|v2|public)
+  audit_citations.py  저장된 결과의 조문 인용 재채점 → docs/citation_audit.md
+  inspect_raw.py      원문 조항 분할 확인 → docs/raw_clauses.md
+data/
+  raw/                공개 원문 (하도급법, 표준하도급계약서 2024·2025판, 표준도급계약서) + public_cases/ 공정위 의결서 3건
+  thresholds.yaml     규칙 기준값 (원문 인용 포함)
+  synthetic/          set-v1 합성 계약서 (SYNTHETIC, 결과 재현용으로 수정 금지)
+  synthetic_v2/       set-v2 합성 계약서 (조문 참조 재번호 버그 수정판)
+  public_cases/       set-public 시험 문서 + cases.yaml (실제 문구·출처·허용 카테고리)
+eval/
+  cases/ · cases_v2/ · cases_public/   평가셋별 정답 라벨
+  results/            평가 결과 (JSON + MD), sample_report/
+tests/                102개 (키 없이 실행)
+docs/                 01~07 개발 단계 문서, SPEC, PLAN, citation_audit, raw_clauses     PROGRESS.md  진행 로그
 ```

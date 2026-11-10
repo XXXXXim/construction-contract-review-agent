@@ -345,3 +345,24 @@
 - 보도 기사 링크 2곳은 `TODO(링크)` — 보스가 제공 예정
 - 기대효과는 측정값만: 조항 자동 대조(표준 168개 조항 인덱스, set-v2 hit@3 1.00), 조문 인용 오류 0건(baseline 40건), 숫자 규칙으로 v1 누락 2건 탐지. 시간 절감 수치는 쓰지 않음
 - 사내 정보·특강 수치(에이전트 수, 검토 시간 등)는 README 에 넣지 않음
+
+## 2026-11-10 · 공개 준비 [5] 샘플 리포트 교체 — 보류
+- set-v2 v2 리포트를 캐시로 재생성하려 했으나 LLM 응답 캐시(`.cache/llm/`, gitignore)는 보스 맥에만 있고 이 세션에는 없음 → API 호출 없이는 불가해 **멈춤**
+- 프롬프트 생성 코드는 11/08 평가 이후 바뀌지 않아 보스 맥에서 실행하면 전부 캐시 적중(비용 0) 예상. 명령은 보스에게 전달
+
+## 2026-11-10 · 공개 준비 [6] 오래된 문구 수정
+**고친 것 (실제 값 기준)**
+| 위치 | 이전 | 수정 | 실제 값 근거 |
+|---|---|---|---|
+| README "핵심 설계 결정" | `make test` 47개 | 102개 | `pytest --collect-only` 102 |
+| 02_requirements NFR-03, 05_traceability (2곳) | 74 passed | 102 passed | 같음 |
+| 06_retro 머리말 | 테스트 74개 | 74개(회고 작성 시점) + 현재 102개 병기 | 회고 커밋 836d8cf 당시 74 |
+| 03_design 테스트 계획, 05_traceability NFR-01 | 기준값 15개 | 18개 항목(값 16 + TODO 2, 규칙 사용 14) | `load_thresholds()` 18, `rule_thresholds()` 14 |
+| 02_requirements FR-06 | 기준값 15개 중 규칙 사용 14개 | 항목 18개(값 16, TODO 2) / 규칙 사용 14개 | 같음 |
+| README 레포 구조 | M4 시점 구조 | citation_check.py, textnorm.py, eval_retrieval.py, synthetic_v2, public_cases, cases_v2, cases_public, 새 스크립트 반영 | `git ls-files` |
+
+**점검했지만 그대로 둔 것**
+- 토큰 수: README·docs 의 모든 "NN,NNN" 토큰 수가 `eval/results/` 저장값과 일치 (스크립트 대조)
+- PLAN M1 "33 passed", PROGRESS 날짜별 숫자: 그 시점 기록이라 유지
+- 06_retro "커밋 15개": 회고 커밋 직전 기준으로 맞음 (회고 커밋 포함 16)
+- SPEC 7절 "변형 7~10개, 라벨 20개 이상": 목표 사양이고 실제(8개·24개)와 모순 아님
