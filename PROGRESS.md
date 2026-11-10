@@ -339,3 +339,9 @@
 - 맨 위 18줄(빈 줄 제외 14줄): 한 줄 문제 정의, 결과표(baseline/v1/v2 × Recall·Precision·근거 조항 정확도·조문 인용 오류·입력 토큰), 핵심 메시지(근거 정확성 40→0, set-public 에서 baseline 도 5/5), 한계 한 줄, 실행 명령 3줄
 - 숫자 출처: `eval/results/2026-11-08_*_anthropic-claude-sonnet-5-5_set-v2.json` (Recall·Precision·정확도·토큰), 조문 인용 오류는 `scripts/audit_citations.py` 로 세 평가셋 결과를 재채점한 합계 (set-v1 15 + set-v2 24 + set-public 1)
 - 기존 내용은 삭제 없이 "# 상세" 아래로 이동. 스크린샷 자리: `docs/images/streamlit_report.png` (README 에 주석 처리된 이미지 줄)
+
+## 2026-11-10 · 공개 준비 [4] 회사 과제와의 연결 문단
+- README "왜 이 문제를 골랐나": 2026-11-02 공개 발표된 '1인 1 AI 에이전트' 체계, 보도된 과제 '대외 공문 및 계약 검토'를 공개 자료만으로 재현
+- 보도 기사 링크 2곳은 `TODO(링크)` — 보스가 제공 예정
+- 기대효과는 측정값만: 조항 자동 대조(표준 168개 조항 인덱스, set-v2 hit@3 1.00), 조문 인용 오류 0건(baseline 40건), 숫자 규칙으로 v1 누락 2건 탐지. 시간 절감 수치는 쓰지 않음
+- 사내 정보·특강 수치(에이전트 수, 검토 시간 등)는 README 에 넣지 않음
