@@ -419,3 +419,25 @@
 - 상세 결과표에 set-v2 2차 행 3개 추가 (`eval/results/2026-11-10_*_set-v2.json` 값 그대로)
 - **1차에서만 맞는 주장을 정정:** "v1 → v2 개선은 전부 규칙 레이어" → 2차에서는 v1 도 맞혀 차이 0. 규칙의 가치는 "평균 상승"보다 "실행마다 같은 답"으로 서술 (README, 07 최종 보고 2절·자소서 3줄, 06 회고)
 - 한계: "1회 실행" → "set-v2 2회 실행, Recall·Precision 최대 0.08 차이 (v1 Recall 0.917 → 1.000)"
+
+## 2026-11-14 · Orca 병렬 작업 인수인계 준비 (새 기능 없음)
+**[1] 현재 상태 얼리기**
+- 작업 트리 깨끗함, `origin/main` 과 동일(3496a64) 확인
+- 태그 `v1.0-application` (주석 태그, 3496a64) 을 로컬에 만들었으나 **push 실패**: 세션 프록시가 태그 push(git HTTP 403)와 GitHub API 쓰기를 모두 거부. 우회하지 않음 → 보스 맥에서 실행할 명령을 `docs/ORCA_HANDOFF.md` 0-2 에 적음
+- `docs/FROZEN_NUMBERS.md`: 자소서 숫자 6개와 출처 파일·필드. **6개 모두 결과 파일과 일치** (불일치 0)
+  - 인용 오류 40 = 11/08 결과만으로 검사기를 다시 돌려 15(set-v1) + 24(set-v2) + 1(set-public) 재현, v1·v2 0
+  - 근거 조항 정확도 0.0 → 1.0 (set-v1·v2, 1차·2차 모두), 라벨 24 = 8×3, 규칙 기준값 14(전체 18), set-v1 v2 오탐 3건 = 제11조/design_change ×3 (set-v2 0건), 토큰 257,866 ÷ 43,560 = 5.92
+  - 해석 주의 4가지(40은 세 평가셋 합·2차 기준 39, baseline 0% 이유, v1 오탐은 4건 중 3건, 1차·2차 Precision 차이)를 같은 파일에 기록
+
+**[2] 병렬 작업 공통 규칙** — `CLAUDE.md` 새 섹션 + 같은 내용의 `AGENTS.md`(다른 CLI 에이전트용, 절대 규칙 요약 포함). 두 파일의 규칙 섹션이 같음을 diff 로 확인
+- 보스 지시 9개 외에 공유 파일 충돌을 막는 운영 규칙 추가: 진행 기록은 `docs/progress/<브랜치명>.md`(PROGRESS.md 는 보스가 합칠 때 정리), 요구사항은 작업별 ID 범위로 제안만, 담당 없는 공유 파일 목록, 첫 push 뒤 rebase 대신 merge
+
+**[3]·[4] `docs/ORCA_HANDOFF.md`** — 맨 위 보스 맥 할 일(클론·setup·test, 태그 push, gh 로그인, Orca 설치, 1차 워크트리 4개, 워크트리별 첫 프롬프트, 2차 시작), 작업 8개의 목표/담당 파일/완료 기준/하지 말 것/의존 관계, 마지막에 담당 파일 겹침 표
+- 담당 파일은 `git ls-files` 기준 실제 경로. 동시 진행 작업끼리 겹침 없음
+- 보스 확인이 필요한 추가 제안 4개: ws-c 에 `schemas.py`·`nodes/report.py`(선택 필드 추가만), `data/amount_basis.yaml`, ws-d 의 `scripts/run_public_contracts.py`, ws-f 의 `data/demo/`
+- 발견한 제약: HWP 표 손실은 `data/raw/` 변환본을 고쳐야 해결되므로 ws-b 는 감지·표시까지만, 재변환은 보스 결정. 워크트리마다 `make setup` 필요(editable 설치가 설치 폴더의 src 를 가리킴), 워크트리에 `.env` 복사 금지
+- Orca 공식 문서(orca.dev)는 세션 네트워크에서 막혀 메뉴 이름을 확인하지 못함 → 워크트리 생성은 `git worktree` 명령으로 적음. 설치 링크·brew 명령은 GitHub `stablyai/orca` README 기준
+
+**다음 할 일 (보스)**
+- 맥에서 `docs/ORCA_HANDOFF.md` 0-1 ~ 0-6 순서대로. 특히 0-2 태그 push
+- 추가 제안 4개 승인 여부
