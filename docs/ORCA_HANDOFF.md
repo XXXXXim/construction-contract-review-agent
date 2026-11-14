@@ -19,8 +19,9 @@ make lint
 Python 3.11 이상이 필요하다. 기본 `python3` 가 3.10 이하라면 `make setup PY=python3.13` 처럼 지정한다.
 
 ### 0-2. 태그 push (클라우드 세션에서는 막혀서 못 함)
-클라우드 세션 프록시가 태그 push 를 거부했다(HTTP 403). 맥에서 한 번만 실행한다.
+클라우드 세션 프록시가 태그 push 를 거부했다(HTTP 403). 맥에서 한 번만 실행한다. **레포 폴더 안에서** 실행해야 하므로 `cd` 부터 한다 (0-1 을 안 했으면 0-1 먼저).
 ```bash
+cd ~/code/construction-contract-review-agent
 git tag -a v1.0-application 3496a64 -m "SK에코플랜트 지원서(자기소개서)에 인용된 버전. 숫자 출처: docs/FROZEN_NUMBERS.md"
 git push origin v1.0-application
 git ls-remote --tags origin    # refs/tags/v1.0-application 이 보이면 끝
