@@ -18,7 +18,7 @@ make lint
 ```
 Python 3.11 이상이 필요하다. 기본 `python3` 가 3.10 이하라면 `make setup PY=python3.13` 처럼 지정한다.
 
-### 0-2. 태그 push (클라우드 세션에서는 막혀서 못 함)
+### 0-2. 태그 push — ✅ 완료 (2026-11-14, 보스 맥, 원격 태그 → 3496a64 확인)
 클라우드 세션 프록시가 태그 push 를 거부했다(HTTP 403). 맥에서 한 번만 실행한다. **레포 폴더 안에서** 실행해야 하므로 `cd` 부터 한다 (0-1 을 안 했으면 0-1 먼저).
 ```bash
 cd ~/code/construction-contract-review-agent
@@ -103,7 +103,7 @@ git diff --diff-filter=MD --name-only 9bda558 -- eval/results eval/cases eval/ca
 - 합칠 때마다 그 PR 의 `docs/progress/<브랜치명>.md` 요약을 `PROGRESS.md` 에 한 단락으로 옮긴다 (보스 담당).
 
 ### 0-8. 2차를 시작하는 조건 (전부 체크되면 시작)
-- [ ] 태그 `v1.0-application` 이 원격에 있다 (`git ls-remote --tags origin`)
+- [x] 태그 `v1.0-application` 이 원격에 있다 (`git ls-remote --tags origin`)
 - [ ] 1차 PR 3개(`ws-d-eval`, `ws-a-fit`, `ws-g-interview`)가 main 에 합쳐졌다
 - [ ] main 에서 `make test` · `make lint` 통과, 0-7 의 보호 파일 확인 명령 출력 없음
 - [ ] ws-e-review 가 1차 PR 3개 모두 리뷰했고, 막는 문제(❌)가 남아 있지 않다
