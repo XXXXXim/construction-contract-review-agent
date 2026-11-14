@@ -59,35 +59,87 @@ for w in ws-a-fit ws-d-eval ws-g-interview ws-e-review; do (cd ../ccra-wt/$w && 
 - **`.env` 는 워크트리에 복사하지 않는다.** 키가 없으면 실수로 실제 LLM 을 부를 수 없다 (공통 규칙 5).
 
 ### 0-6. 각 워크트리에 붙여넣을 첫 프롬프트
-Claude Code 든 Codex 든 같은 문장을 쓴다. Codex 는 `CLAUDE.md` 대신 `AGENTS.md` 를 읽는다.
+`<작업 이름>` 자리에 `ws-a-fit`, `ws-d-eval`, `ws-g-interview`, `ws-e-review` 를 넣는다. 에이전트가 5줄 계획을 보고하면 보스가 확인하고 "OK" 를 보낸다.
+```
+ORCA_HANDOFF.md의 <작업 이름> 섹션과 CLAUDE.md를 읽고, 시작 전에 계획을 5줄로 보고한 뒤 내 OK를 받고 시작해.
+```
+- Codex 등 Claude Code 가 아닌 에이전트는 `CLAUDE.md` 자리에 `AGENTS.md` 를 넣는다 (병렬 규칙은 두 파일이 같다).
+- ws-e-review 는 다른 작업의 PR 이 하나 이상 열린 뒤에 붙여넣는다.
+- 2차·선택 작업(ws-b-fix, ws-c-advance-c1 ~ c4, ws-f-demo, ws-h-databricks)도 같은 문장을 쓴다. ws-c 는 기능마다 `<작업 이름>` 에 `ws-c-advance (C1)` 처럼 기능을 적는다.
 
-**ws-a-fit**
-```
-ORCA_HANDOFF.md의 ws-a-fit 작업을 해. 먼저 CLAUDE.md(또는 AGENTS.md)의 "병렬 작업 공통 규칙"과 docs/ORCA_HANDOFF.md의 ws-a-fit 절, docs/FROZEN_NUMBERS.md를 읽고, 담당 파일·완료 기준·하지 말 것을 5줄로 요약해서 보여준 뒤 시작해. 브랜치는 ws-a-fit, 끝나면 PR만 열고 멈춰.
-```
-**ws-d-eval**
-```
-ORCA_HANDOFF.md의 ws-d-eval 작업을 해. 먼저 CLAUDE.md(또는 AGENTS.md)의 "병렬 작업 공통 규칙"과 docs/ORCA_HANDOFF.md의 ws-d-eval 절을 읽고, 담당 파일·완료 기준·하지 말 것을 5줄로 요약해서 보여준 뒤 시작해. 실제 LLM 호출이 필요한 단계는 실행하지 말고 예상 호출 수와 토큰을 PR에 적고 멈춰. 브랜치는 ws-d-eval.
-```
-**ws-g-interview**
-```
-ORCA_HANDOFF.md의 ws-g-interview 작업을 해. 먼저 CLAUDE.md(또는 AGENTS.md)의 "병렬 작업 공통 규칙"과 docs/ORCA_HANDOFF.md의 ws-g-interview 절을 읽고, 담당 파일·완료 기준·하지 말 것을 5줄로 요약해서 보여준 뒤 시작해. 코드는 읽기만 하고 docs/interview/ 와 docs/progress/ws-g-interview.md 만 써. 브랜치는 ws-g-interview.
-```
-**ws-e-review** (다른 작업의 PR 이 열린 뒤에)
-```
-ORCA_HANDOFF.md의 ws-e-review 역할을 해. 먼저 CLAUDE.md(또는 AGENTS.md)의 "병렬 작업 공통 규칙"과 docs/ORCA_HANDOFF.md의 ws-e-review 절을 읽어. 열린 PR 목록을 gh pr list로 확인하고, PR마다 체크리스트대로 검사해서 PR 코멘트와 docs/reviews/<PR번호>.md를 남겨. 코드는 고치지 말고 커밋도 하지 마.
-```
+### 0-7. PR 을 합치는 순서와 합칠 때마다 돌릴 명령
+**합치는 순서**
 
-### 0-7. 1차 PR 을 합친 뒤 (2차 시작)
+| 차수 | 순서 | PR | 이 순서인 이유 |
+|---|---|---|---|
+| 1차 | 1 | `ws-d-eval` | 2차의 모든 측정 기준(set-v3). 코드(`eval.py`)를 바꾸는 유일한 1차 PR 이라 먼저 합치고 테스트로 확인 |
+| 1차 | 2 | `ws-a-fit` | 문서만. README "v1.1 이후 결과" 빈 섹션이 생김 |
+| 1차 | 3 | `ws-g-interview` | 문서만. `파일:줄` 근거가 ws-d 의 `eval.py` 변경으로 밀렸는지 합치기 직전에 확인 (밀렸으면 ws-g 에 `git merge origin/main` 후 줄 번호만 고치게 함) |
+| 2차 | 4 | `ws-c-advance-c2` | ws-f 의 선행 조건이라 먼저. `graph.py` 를 고치지 않으므로 C1 과 동시에 진행 가능 |
+| 2차 | 5 | `ws-c-advance-c1` | |
+| 2차 | 6 | `ws-b-fix` | ws-c 와 담당 파일이 겹치지 않아 순서 무관. 준비되는 대로 |
+| 2차 | 7 | `ws-c-advance-c3` → `ws-c-advance-c4` | 둘 다 `graph.py` 를 고치므로 C1 합친 뒤 하나씩 |
+| 2차 | 8 | `ws-f-demo` | C2 가 합쳐진 뒤 시작했으므로 마지막 |
+| 선택 | – | `ws-h-databricks` | 독립. 언제 합쳐도 됨 |
+
+**PR 하나를 합치기 전에**
+1. PR 의 GitHub Actions(Python 3.11·3.13 `make test` · `make lint`)가 초록인지 확인
+2. ws-e-review 의 PR 코멘트에서 ❌ 가 없는지 확인 (로컬 요약: `../ccra-wt/ws-e-review/docs/reviews/<PR번호>.md`)
+3. PR 설명이 4단 형식이고, "실제 LLM 승인 요청"이 있으면 승인 여부를 먼저 결정
+
+**합친 직후 매번 (원래 클론에서)**
+```bash
+cd ~/code/construction-contract-review-agent
+git switch main && git pull
+make setup        # pyproject.toml 이 바뀐 PR 일 때만 필요. 나머지는 생략 가능
+make test
+make lint
+git diff --diff-filter=MD --name-only 9bda558 -- eval/results eval/cases eval/cases_v2 eval/cases_public data/raw data/synthetic data/synthetic_v2 data/public_cases docs/FROZEN_NUMBERS.md
+```
+- 마지막 명령은 **아무것도 출력하지 않아야 한다.** 파일 이름이 나오면 보호 파일(기존 결과·라벨·원문·고정 숫자)이 수정·삭제된 것이니 `git revert` 로 되돌리고 그 작업에 알린다. (`9bda558` = 이 인수인계 문서를 추가한 커밋. 보호 파일은 태그 `v1.0-application` 과 같다)
+- `make test` 나 `make lint` 가 실패하면 다음 PR 을 합치지 않는다. 실패한 PR 의 작업에 원인을 보고하게 한다.
+- 진행 중인 다른 워크트리는 다음 작업 단위를 시작하기 전에 `git fetch origin && git merge origin/main` 으로 따라온다.
+- 합칠 때마다 그 PR 의 `docs/progress/<브랜치명>.md` 요약을 `PROGRESS.md` 에 한 단락으로 옮긴다 (보스 담당).
+
+### 0-8. 2차를 시작하는 조건 (전부 체크되면 시작)
+- [ ] 태그 `v1.0-application` 이 원격에 있다 (`git ls-remote --tags origin`)
+- [ ] 1차 PR 3개(`ws-d-eval`, `ws-a-fit`, `ws-g-interview`)가 main 에 합쳐졌다
+- [ ] main 에서 `make test` · `make lint` 통과, 0-7 의 보호 파일 확인 명령 출력 없음
+- [ ] ws-e-review 가 1차 PR 3개 모두 리뷰했고, 막는 문제(❌)가 남아 있지 않다
+- [ ] set-v3 라벨(`eval/cases_v3/`)이 main 에 커밋돼 있다 (측정 전에 확정)
+- [ ] 보스가 `data/synthetic_v3/REVIEW_SAMPLE.md` 의 무작위 5개를 직접 검수했다 (의미가 원래 변형과 같은지). 틀린 것이 있으면 ws-d 를 다시 열어 고친 뒤 합친다
+- [ ] set-v3 의 BM25 hit@3 가 ws-d 진행 기록에 있다 (set-v2 의 1.00 보다 낮은지 확인. 낮지 않으면 "어려운 평가셋"이 아니므로 2차의 개선 측정 의미가 약하다는 점을 알고 시작)
+- [ ] **set-v3 기준선 측정 여부 결정**: 2차의 "개선"을 주장하려면 지금 구성(baseline/v1/v2)의 set-v3 점수가 먼저 필요하다. ws-d PR 의 예상 호출 수·토큰을 보고 승인하면 2차 시작 전에 보스 맥에서 한 번 돌려 `eval/results/` 새 파일로 커밋 (승인 안 하면 2차는 FakeLLM 테스트와 검색 hit@3 만으로 진행하고 '개선' 주장은 하지 않는다)
+- [ ] 보스 결정 4개: ws-c 에 `schemas.py`·`nodes/report.py` 허용 여부, `data/amount_basis.yaml`, ws-d 의 `scripts/run_public_contracts.py`(1차에서 결정), ws-f 의 `data/demo/`
+- [ ] 보스 결정 1개: HWP 표 손실 재변환을 할지 (하면 새 도구 승인 + 표준 인덱스가 바뀌어 기존 결과와 비교가 깨짐. 안 하면 ws-b 는 감지·표시까지만)
+- [ ] `PROGRESS.md` 에 1차 결과를 정리했다
+
+### 0-9. 2차 워크트리 만들기 (0-8 이 다 체크된 뒤)
 ```bash
 cd ~/code/construction-contract-review-agent && git switch main && git pull
 git worktree add -b ws-b-fix              ../ccra-wt/ws-b-fix              origin/main
-git worktree add -b ws-c-advance-c1       ../ccra-wt/ws-c-advance-c1       origin/main   # C2~C4 는 C1 PR 을 연 뒤 하나씩
-(cd ../ccra-wt/ws-b-fix && make setup && make test)
-(cd ../ccra-wt/ws-c-advance-c1 && make setup && make test)
+git worktree add -b ws-c-advance-c1       ../ccra-wt/ws-c-advance-c1       origin/main
+git worktree add -b ws-c-advance-c2       ../ccra-wt/ws-c-advance-c2       origin/main
+for w in ws-b-fix ws-c-advance-c1 ws-c-advance-c2; do (cd ../ccra-wt/$w && make setup && make test); done
+(cd ../ccra-wt/ws-e-review && git fetch origin && git checkout --detach origin/main && make test)   # 리뷰어도 최신 main 으로
 ```
-ws-f-demo 는 C2(`ws-c-advance-c2`) PR 을 합친 뒤에 만든다. ws-h-databricks 는 선택이며 언제든 독립적으로 시작할 수 있다.
-다 끝난 워크트리는 `git worktree remove ../ccra-wt/<이름>` 으로 정리한다.
+- C3·C4 는 C1 이 합쳐진 뒤 하나씩 만든다 (`git worktree add -b ws-c-advance-c3 ../ccra-wt/ws-c-advance-c3 origin/main`).
+- ws-f-demo 는 C2 가 합쳐진 뒤 만든다. ws-h-databricks 는 선택이며 언제든 시작할 수 있다.
+- 다 끝난 워크트리는 `git worktree remove ../ccra-wt/<이름>` 으로 정리한다.
+
+### 0-10. 걸리는 시간 (추정)
+이 레포에서 실제로 걸린 시간을 기준으로 한 **추정**이다 (M0~M7 4일, set-v2 생성·검증 반나절, set-public 반나절, 처리 시간 실측 계약서당 약 40~45초).
+
+| 구간 | 에이전트 작업 (병렬) | 보스 시간 | 비고 |
+|---|---|---|---|
+| 1차 준비 (0-1 ~ 0-6) | – | 30분~1시간 | 클론·setup 4번(워크트리당 1~2분)·Orca 설치 |
+| 1차 작업 | ws-a 1~2시간, ws-g 2~4시간, **ws-d 4~8시간** (가장 김: 재작성 24개·공개 계약서 찾기·스크립트·테스트), ws-e PR 당 15~30분 | 계획 OK 4번, 질문 응답 | 벽시계 기준 ws-d 가 끝나는 때 = **반나절~하루** |
+| 1차 마무리 | – | 2~3시간 | PR 3개 리뷰·합치기(개당 20~30분), REVIEW_SAMPLE 5개 검수 20~30분, 결정 5개 |
+| set-v3 기준선 측정 (승인 시) | – | 30분 안팎 | 세 구성 1회 약 311회 호출. set-v2 실측(계약서당 40~45초) 기준 9개 실행 약 7분 + 캐시·커밋. 3회 반복이면 약 20~25분 |
+| 2차 작업 | ws-b 4~8시간 (HWP 결정에 따라), C1·C2 동시 각 2~4시간, C3·C4 순서대로 각 2~4시간, ws-f 3~5시간 (C2 뒤), ws-h 2~3시간 | PR 7개 리뷰·합치기 3~4시간, 승인 요청 응답 | 벽시계 기준 **2~3일** (C1 → C3 → C4 → 그 사이 ws-f) |
+| 합계 | | | **약 3~4일**, 보스 시간 약 7~10시간 |
+
+시간이 더 걸릴 수 있는 지점: ws-d 의 공개 계약서 찾기(공고 첨부가 HWP 뿐이거나 내려받기가 막힘), set-v3 검수에서 의미가 바뀐 재작성 발견, ws-b 의 HWP 재변환 결정, 실제 LLM 승인 대기.
 
 ---
 
@@ -284,12 +336,12 @@ ws-f-demo 는 C2(`ws-c-advance-c2`) PR 을 합친 뒤에 만든다. ws-h-databri
 ---
 
 ### ws-c-advance · 고도화 (기능마다 작은 PR 로 따로)
-기능마다 브랜치와 PR 을 따로 만든다: `ws-c-advance-c1`, `-c2`, `-c3`, `-c4`. 앞 PR 을 연 뒤 다음 기능을 시작한다(같은 파일 `graph.py` 를 고치므로 순서대로, 앞 PR 이 합쳐진 뒤 `git merge origin/main`).
+기능마다 브랜치와 PR 을 따로 만든다: `ws-c-advance-c1`, `-c2`, `-c3`, `-c4`. **C2 는 `graph.py` 를 고치지 않으므로 C1 과 동시에** 진행한다. C1·C3·C4 는 모두 `graph.py` 를 고치므로 **앞 PR 이 합쳐진 뒤** 다음 기능을 시작한다 (C1 → C3 → C4).
 
 **공통 원칙: 기존 구성(baseline/v1/v2)의 동작은 바꾸지 않는다.** 새 노드는 `PipelineConfig` 의 새 플래그(기본 꺼짐) 또는 새 구성 이름으로만 켠다. 그래야 `FROZEN_NUMBERS` 와 기존 결과가 계속 같은 의미를 가진다.
 
 - **C1 관련성 검증 (FR-30)**: 인용이 실존하는지만이 아니라 그 지적을 실제로 뒷받침하는지 반론하는 검증 노드(Red Team 방식). 판정(위험도·카테고리)은 바꾸지 않고 '재검토 필요' 표시만 단다. 추가 LLM 호출 수를 PR 에 적는다.
-- **C2 사람 검토 기록 (FR-31)**: 각 지적에 검토자가 수락/거절/메모를 남기는 저장 구조(`feedback.py`, 저장 위치는 gitignore 된 `outputs/feedback/`)와, 기록을 모아 오탐 패턴(카테고리·조항·규칙/LLM 별 거절률)을 집계하는 `scripts/feedback_report.py`. 화면 연결은 ws-f.
+- **C2 사람 검토 기록 (FR-31, `graph.py` 수정 없음)**: 각 지적에 검토자가 수락/거절/메모를 남기는 저장 구조(`feedback.py`, 저장 위치는 gitignore 된 `outputs/feedback/`)와, 기록을 모아 오탐 패턴(카테고리·조항·규칙/LLM 별 거절률)을 집계하는 `scripts/feedback_report.py`. 화면 연결은 ws-f.
 - **C3 리스크 금액 표시 (FR-32)**: 금액 계산은 원문에 근거가 있는 것만(예: 계약금액과 원문 비율이 둘 다 있는 경우). 근거가 없으면 `TODO(source-needed)`. 현재 `data/thresholds.yaml` 의 TODO 2건(지체상금 요율, 하자담보 기간 상한)은 채우지 않는다.
 - **C4 운영 로그 (FR-33, NFR-14)**: 실행마다 처리 시간·토큰·LLM 호출 수·지적 수·버린 지적 수를 JSONL(`outputs/telemetry/`, gitignore)로 남기고 요약 리포트를 만드는 `scripts/ops_report.py`.
 
@@ -413,7 +465,7 @@ ws-f-demo 는 C2(`ws-c-advance-c2`) PR 을 합친 뒤에 만든다. ws-h-databri
 - `README.md`: ws-a(1차)만 쓴다. ws-f(2차)는 `docs/demo/` 에 제안만 하고, 2차 이후 "v1.1 이후 결과" 추가는 보스 승인 뒤 별도 문서 PR.
 - `eval.py` 는 ws-d 만. ws-b·ws-c 는 2차에서 `eval.py` 를 고치지 않고 실행만 한다. C4 운영 로그는 `graph.py` 에서 남기므로 `eval.py` 수정이 필요 없다.
 - `graph.py` 는 ws-c 만. ws-b 의 검색 수정은 `retrieve_standard.py` 안에서 끝나야 하고, `graph.py` 연결 변경이 필요하면 멈추고 보고.
-- ws-c 의 C1~C4 는 모두 `graph.py` 를 고치므로 **동시에 돌리지 않고 순서대로** 한다.
+- ws-c 의 C1·C3·C4 는 모두 `graph.py` 를 고치므로 **동시에 돌리지 않고 순서대로** 한다. C2 는 `feedback.py`·`scripts/feedback_report.py`·`tests/test_feedback.py` 만 써서 C1 과 동시에 돌아도 겹치지 않는다. C2 가 지적을 식별하는 키는 기존 `Finding` 필드(`clause_id`, `category`)로 만들고 `schemas.py` 를 고치지 않는다.
 - ws-c 가 `graph.py` 를 바꾸면 담당 없는 기존 테스트 `tests/test_judge_and_graph.py` 가 깨질 수 있다. 깨지면 고치지 말고 보고 (공통 규칙).
 - `schemas.py`·`nodes/report.py` 는 지금 담당 없음. ws-c 에 주는 것은 **보스 승인 시에만**, 그 경우 2차 동안 ws-b·ws-f 는 이 두 파일을 고치지 않는다.
 - `nodes/parse.py`(ws-b)와 `app/streamlit_app.py`(ws-f): 업로드 화면이 parse 를 호출하지만 ws-f 는 parse 를 고치지 않는다.
