@@ -21,11 +21,33 @@
 8. 네트워크 때문에 무언가를 못 받으면 우회하지 말고 필요한 것을 보고한다.
 9. 평가 숫자를 좋게 보이려고 평가셋(`eval/cases`)을 고치지 않는다. 나빠진 숫자도 그대로 기록한다.
 
+## 병렬 작업 공통 규칙 (Orca 워크트리, 2026-11-14 보스 지시)
+> `AGENTS.md` 의 같은 이름 섹션과 내용이 같아야 한다. 한쪽을 고치면 다른 쪽도 고친다.
+> 작업별 목표·담당 파일·완료 기준은 `docs/ORCA_HANDOFF.md`. 자소서 인용 숫자는 `docs/FROZEN_NUMBERS.md`.
+
+1. **작업마다 브랜치 하나.** 이름은 `docs/ORCA_HANDOFF.md` 표를 따른다. `main` 에 직접 push 금지. 끝나면 PR 만 열고, 합치는 것은 보스가 한다.
+2. **담당 파일 밖은 수정 금지.** 꼭 필요하면 PR 설명에 이유를 적고 멈춘다.
+3. `eval/results/` 의 기존 파일, `eval/cases*/` 의 기존 라벨, `data/raw/` 는 **수정·삭제 금지.** 새 평가는 새 파일로만.
+4. `docs/FROZEN_NUMBERS.md` 의 숫자를 README 에서 바꾸지 않는다. 새 결과는 README 의 별도 섹션 **"v1.1 이후 결과"** 에만 추가한다.
+5. **실제 LLM API 를 부르는 평가는 보스 승인 없이 실행 금지.** 테스트는 FakeLLM 으로. 승인이 필요하면 예상 호출 수와 토큰을 PR 에 적고 멈춘다.
+6. 성능 개선을 주장하려면 **ws-d 가 만든 평가셋**으로 측정한다. 개발 중에 본 데이터로 잰 숫자는 '개선'이라고 쓰지 않는다.
+7. 기존 규칙은 그대로: 법령 수치를 기억으로 쓰지 않기, 평가셋을 숫자에 맞춰 고치지 않기, 같은 테스트 3회 연속 실패 시 멈춤, 의존성 추가 전 승인.
+8. **PR 설명 형식:** `## 바꾼 것` / `## 검증 방법과 결과` / `## 바꾸지 않은 것` / `## 남은 문제`.
+9. 회사 관련 서술은 **공개 보도로 확인되는 것만.** 내부 정보나 특강 내용은 쓰지 않는다.
+
+**공유 파일 충돌을 막기 위한 운영 규칙** (위 규칙을 지키기 위한 세부 사항)
+- 진행 기록은 `PROGRESS.md` 가 아니라 **`docs/progress/<브랜치명>.md`** 에 쓴다 (작업별 담당 파일). `PROGRESS.md` 는 보스가 PR 을 합칠 때 정리한다.
+- 새 요구사항은 `docs/02_requirements.md` 를 직접 고치지 않고 진행 기록 파일의 "요구사항 제안" 절과 PR 설명에 적는다. ID 는 `docs/ORCA_HANDOFF.md` 에서 작업마다 미리 나눈 범위를 쓴다 (겹침 방지). 테스트 docstring 에는 그 ID 를 적는다.
+- `Makefile`, `pyproject.toml`, `.github/`, `CLAUDE.md`, `AGENTS.md`, `PROGRESS.md`, `docs/02~06`, `data/thresholds.yaml`, `src/contract_review/schemas.py` 처럼 **담당이 없는 공유 파일**은 고치지 않는다. 필요하면 PR 에 바꿀 내용을 적고 멈춘다 (단, 담당 표에 예외로 적힌 경우는 그 범위 안에서만).
+- 기존 테스트 파일은 그 파일을 담당한 작업만 고친다. 다른 작업은 새 테스트 파일을 만든다. 기존 테스트가 깨지면 고치지 말고 원인을 보고한다.
+- 작업 시작 전 `git fetch origin && git rebase origin/main` 으로 최신 main 위에서 시작한다. 첫 push 뒤에는 rebase 대신 `git merge origin/main` 을 쓴다 (force push 금지).
+
 ## 폴더 구조
 ```
 .
 ├── CLAUDE.md               # 이 파일 (하네스 규칙)
-├── PROGRESS.md             # 진행 로그. 새 세션은 여기부터 읽는다
+├── PROGRESS.md             # 진행 로그. 새 세션은 여기부터 읽는다 (병렬 작업 중에는 보스만 수정)
+├── AGENTS.md               # 다른 CLI 에이전트용 규칙 (병렬 작업 공통 규칙 = 이 파일과 동일)
 ├── docs/01_brief.md        # P0 문제 정의 (고객, 성공 지표, 가정)
 ├── docs/02_requirements.md # P1 요구사항 (FR/NFR, 수용 기준, 상태)
 ├── docs/03_design.md       # P2 설계 (ADR, 아키텍처, 컴포넌트)
@@ -33,6 +55,9 @@
 ├── docs/05_traceability.md # P6 요구사항 추적표
 ├── docs/06_retro.md        # P7 회고 (KPT)
 ├── docs/07_final_report.md # 최종 보고 (지표, 자소서 3줄, 면접 질문)
+├── docs/FROZEN_NUMBERS.md   # 자소서 인용 숫자와 출처 (v1.0-application, 수정 금지)
+├── docs/ORCA_HANDOFF.md    # 병렬 작업(ws-*) 인수인계: 목표·담당 파일·완료 기준
+├── docs/progress/          # 병렬 작업별 진행 기록 (<브랜치명>.md)
 ├── docs/citation_audit.md  # 조문 인용 검증 결과 (scripts/audit_citations.py 자동 생성)
 ├── docs/SPEC.md            # 입력·출력 스키마, 카테고리, 판정 기준, 비범위
 ├── docs/PLAN.md            # 마일스톤 체크리스트
@@ -74,5 +99,5 @@
 - 테스트에서 네트워크를 쓰지 않는다.
 
 ## 커밋 규칙
-- 마일스톤마다: 테스트 통과 → `PROGRESS.md` 업데이트 → 작은 단위로 커밋.
+- 마일스톤마다: 테스트 통과 → `PROGRESS.md` 업데이트 → 작은 단위로 커밋. (병렬 작업 브랜치에서는 `PROGRESS.md` 대신 `docs/progress/<브랜치명>.md`)
 - 메시지 형식: `feat(M3): ...`, `fix(M4): ...`, `docs(M0): ...`, `test(M1): ...`
